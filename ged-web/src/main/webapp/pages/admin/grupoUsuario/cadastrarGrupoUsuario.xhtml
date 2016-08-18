@@ -25,84 +25,91 @@
 				  				<p:ajax partialSubmit="true" process="@this" event="change" global="false"></p:ajax>
 				  			</p:inputText>
 				           	
-				           	<p:outputLabel id="labelNomeUsuario" for="nomeUsuario" value="#{msg['GRUPOUSUARIO3']}: " />
-				           	
-			       			<p:inputText id="nomeUsuario" value="#{cadastroGrupoUsuario.paramPesquisaUsuario}">
-			       				<p:ajax event="keyup" listener="#{cadastroGrupoUsuario.atualizaSelectManyCheckBox}" update="@form" partialSubmit="true"></p:ajax>
-			       			</p:inputText>
 				        </h:panelGrid>
-				        
-				        <p:tooltip id="toolTipNomeUsuario" for="labelNomeUsuario" value="Utilizar para filtrar usuários pelo nome."
-						               showEffect="clip" hideEffect="explode" position="top"/>
-						
-						<p:tooltip id="toolTipNomeUsuario2" for="nomeUsuario" value="Utilizar para filtrar usuários pelo nome."
-						               showEffect="clip" hideEffect="explode" position="top"/>
 						               
-				        <p:scrollPanel id="usuarios" rendered="#{cadastroGrupoUsuario.renderizaManyCheckBox}">
-				        
-				        	<p:selectManyCheckbox id="grid" value="#{cadastroGrupoUsuario.usuariosSelecionados}" layout="grid" columns="3">
-				        		
-				        		<p:ajax partialSubmit="true" process="@this" event="change" global="false"></p:ajax>
-				        		
-						        <f:selectItems value="#{cadastroGrupoUsuario.listSelectItemUsuarios}" />
-						    </p:selectManyCheckbox>
-						    
-				        </p:scrollPanel>	
+			          	<p:panel id="usuarios" header="Usuários"  >
+		        	
+				        	<p:dataTable id="checkboxDT" var="usr" value="#{cadastroGrupoUsuario.listUsuario}" 
+				        			selection="#{cadastroGrupoUsuario.listUsuarioSelecionados}" 
+				        			rowKey="#{usr}" style="margin-bottom:0"
+				        			filteredValue="#{cadastroGrupoUsuario.listUsuarioFiltrados}" emptyMessage="Nenhum usuário sem grupo">
+						        
+						        <f:facet name="header">
+						            Usuários
+						        </f:facet>
+						        
+						        <p:ajax event="rowSelect" partialSubmit="true" process="@this" ignoreAutoUpdate="true" />
+						        
+						        <p:column selectionMode="multiple" style="width:16px;text-align:center" >
+						        </p:column>
+	
+						        <p:column headerText="Usuario" filterBy="#{usr.pessoa.cpf}" filterMatchMode="contains" >
+						            <h:outputText value="#{usr.pessoa.nome}" />
+						        </p:column>
+						        <p:column headerText="Cpf" filterBy="#{usr.pessoa.cpf}" filterMatchMode="contains">
+						            <h:outputText value="#{usr.pessoa.cpf}" />
+						        </p:column>
+						    </p:dataTable>
+							    
+	        			</p:panel>	
 			    
 			    	</p:panel>
 			    </div>
 			    
 			    <div class="ui-g-6">
 			    
-			    	<p:panel id="panelFuncionalidade" header="#{msg['GRUPOUSUARIO8']} *" style="margin-bottom:20px" cellpadding="10" >
+			    	<p:outputPanel autoUpdate="true">
 			    
-				    	<h:panelGrid cellpadding="10" columns="2">
-				    	
-					    	<p:outputLabel for="funcionalidade" value="#{msg['GRUPOUSUARIO5']}: " />
-				  			<p:selectOneMenu id="funcionalidade" value="#{cadastroGrupoUsuario.funcionalidadeSelecionada}">
-							
-								<p:ajax event="change" update="@form" listener="#{cadastroGrupoUsuario.carregaTipoFuncionalidade}"></p:ajax>
+				    	<p:panel id="panelFuncionalidade" header="#{msg['GRUPOUSUARIO8']} *" style="margin-bottom:20px" cellpadding="10" >
+				    
+					    	<h:panelGrid cellpadding="10" columns="2">
+					    	
+						    	<p:outputLabel for="funcionalidade" value="#{msg['GRUPOUSUARIO5']}: " />
+					  			<p:selectOneMenu id="funcionalidade" value="#{cadastroGrupoUsuario.funcionalidadeSelecionada}">
 								
-								<f:selectItem itemLabel="#{msg['MG03']}" noSelectionOption="true"/>
-								<f:selectItems value="#{cadastroGrupoUsuario.filtroGrupoUsuarioDTO.listFuncionalidades}" />
-							</p:selectOneMenu>
-				    	</h:panelGrid>
-			    	
-				    	 <p:panel id="panelPermissoes" header="#{msg['GRUPOUSUARIO6']} *" style="margin-bottom:20px" cellpadding="10" rendered="#{cadastroGrupoUsuario.funcionalidadeSelecionada != null}">
-				    	 
-					    	 <p:selectManyCheckbox  id="manyCheck" value="#{cadastroGrupoUsuario.tipoFuncionalidadesSelecionadas}" layout="responsive" columns="1">
-						        <f:selectItems value="#{cadastroGrupoUsuario.tipoFuncionalidades}" />
-					    	 </p:selectManyCheckbox>
+									<p:ajax event="change" listener="#{cadastroGrupoUsuario.carregaTipoFuncionalidade}"></p:ajax>
+									
+									<f:selectItem itemLabel="#{msg['MG03']}" noSelectionOption="true"/>
+									<f:selectItems value="#{cadastroGrupoUsuario.filtroGrupoUsuarioDTO.listFuncionalidades}" />
+								</p:selectOneMenu>
+					    	</h:panelGrid>
+				    	
+					    	 <p:panel id="panelPermissoes" header="#{msg['GRUPOUSUARIO6']} *" style="margin-bottom:20px" cellpadding="10" rendered="#{cadastroGrupoUsuario.funcionalidadeSelecionada != null}">
 					    	 
-				    	 </p:panel>
-			    	 
-			    	 	<p:commandButton update="@form" value="#{msg['GRUPOUSUARIO7']}" action="#{cadastroGrupoUsuario.adicionarFuncionalidade}" rendered="#{cadastroGrupoUsuario.funcionalidadeSelecionada != null}"></p:commandButton>
-				    
-				   		<p:separator></p:separator>
-				    
-					    <p:dataTable id="dataTableFuncs" var="func" value="#{cadastroGrupoUsuario.grupoUsuario.funcionalidades}" emptyMessage="#{msg['MG19']}" rendered="#{cadastroGrupoUsuario.mostraDataTableTipoFuncionalidade}">
+						    	 <p:selectManyCheckbox  id="manyCheck" value="#{cadastroGrupoUsuario.tipoFuncionalidadesSelecionadas}" layout="responsive" columns="1">
+							        <f:selectItems value="#{cadastroGrupoUsuario.tipoFuncionalidades}" />
+						    	 </p:selectManyCheckbox>
+						    	 
+					    	 </p:panel>
+				    	 
+				    	 	<p:commandButton value="#{msg['GRUPOUSUARIO7']}" action="#{cadastroGrupoUsuario.adicionarFuncionalidade}" rendered="#{cadastroGrupoUsuario.funcionalidadeSelecionada != null}"></p:commandButton>
 					    
-					        <f:facet name="header">
-					           <h:outputText value="#{msg['GRUPOUSUARIO10']}"/>  
-					        </f:facet>
-						  
-					        <p:column headerText="#{msg['GRUPOUSUARIO5']}" width="65%">  
-					            <h:outputText value=" #{func.label}"/>  
-					        </p:column>  
-					        
-					        <p:column width="25%" style="text-align: center;margin:0 auto;">  
-					             <p:commandButton oncomplete="PF('func').show()" action="#{cadastroGrupoUsuario.verificaTipoFuncionalidadeSelecianda(func)}" value="#{msg['GRUPOUSUARIO6']}" update="@form">
-					             </p:commandButton>
-					        </p:column>  
-					        
-					        <p:column width="10%" style="text-align: center;margin:0 auto;">
-					        	<p:commandButton oncomplete="PF('confirmaExclusao').show()" icon="ui-icon-trash" title="#{msg['MG21']}">
-					                <f:setPropertyActionListener value="#{func}" target="#{cadastroGrupoUsuario.funcionalidadeParaExclusao}" />
-					            </p:commandButton>
-					        </p:column>
-					        
-					    </p:dataTable>
-			    	</p:panel>
+					   		<p:separator></p:separator>
+					    
+						    <p:dataTable id="dataTableFuncs" var="func" value="#{cadastroGrupoUsuario.grupoUsuario.funcionalidades}" emptyMessage="#{msg['MG19']}" rendered="#{cadastroGrupoUsuario.mostraDataTableTipoFuncionalidade}">
+						    
+						        <f:facet name="header">
+						           <h:outputText value="#{msg['GRUPOUSUARIO10']}"/>  
+						        </f:facet>
+							  
+						        <p:column headerText="#{msg['GRUPOUSUARIO5']}" width="65%">  
+						            <h:outputText value=" #{func.label}"/>  
+						        </p:column>  
+						        
+						        <p:column width="25%" style="text-align: center;margin:0 auto;">  
+						             <p:commandButton oncomplete="PF('func').show()" action="#{cadastroGrupoUsuario.verificaTipoFuncionalidadeSelecianda(func)}" value="#{msg['GRUPOUSUARIO6']}" update="@form">
+						             </p:commandButton>
+						        </p:column>  
+						        
+						        <p:column width="10%" style="text-align: center;margin:0 auto;">
+						        	<p:commandButton oncomplete="PF('confirmaExclusao').show()" icon="ui-icon-trash" title="#{msg['MG21']}">
+						                <f:setPropertyActionListener value="#{func}" target="#{cadastroGrupoUsuario.funcionalidadeParaExclusao}" />
+						            </p:commandButton>
+						        </p:column>
+						        
+						    </p:dataTable>
+				    	</p:panel>
+			    	</p:outputPanel>
 			    </div>
 			</div>
 			
@@ -137,8 +144,8 @@
 			        </p:column>
 			        
 			         <p:column style="width:80px;text-align: center;margin:0 auto;">
-			        	<p:commandButton icon="ui-icon-locked" action="#{cadastroGrupoUsuario.ativarFunc(perm)}"  rendered="#{perm.situacao == 'INATIVO'}" update="funcDt"/>
-			        	<p:commandButton icon="ui-icon-unlocked" action="#{cadastroGrupoUsuario.inativarFunc(perm)}" rendered="#{perm.situacao == 'ATIVO'}" update="funcDt"/>
+			        	<p:commandButton icon="ui-icon-locked" action="#{cadastroGrupoUsuario.ativarFunc(perm,cadastroGrupoUsuario.grupoUsuario)}"  rendered="#{perm.situacao == 'INATIVO'}" update="funcDt"/>
+			        	<p:commandButton icon="ui-icon-unlocked" action="#{cadastroGrupoUsuario.inativarFunc(perm,cadastroGrupoUsuario.grupoUsuario)}" rendered="#{perm.situacao == 'ATIVO'}" update="funcDt"/>
 			        </p:column>
 				        
 	         	</p:dataTable>

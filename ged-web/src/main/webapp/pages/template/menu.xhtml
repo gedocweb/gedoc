@@ -1,0 +1,17 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:ui="http://java.sun.com/jsf/facelets"
+				xmlns:h="http://java.sun.com/jsf/html"
+				xmlns:f="http://java.sun.com/jsf/core"
+				xmlns:p="http://primefaces.org/ui">
+	
+	 <p:menubar rendered="#{!painelAdmin.colaborador}"> 
+    	<p:submenu label="#{msg['MENU02']}" >
+    		<p:menuitem value="#{msg['GRUPOUSUARIO4']}" url="/pages/admin/grupoUsuario/painelGrupoUsuario.jsf" immediate="true" />
+    		<p:menuitem value="Usuários" url="/pages/admin/usuario/painelUsuario.jsf"  immediate="true" />
+    	</p:submenu>
+    	
+    	<p:submenu label="#{msg['MENU03']}" >
+    		<p:menuitem value="#{msg['DOC1']}" url="/pages/admin/documento/painelDocumento.jsf" immediate="true" />
+    	</p:submenu>
+    </p:menubar>
+</ui:composition>

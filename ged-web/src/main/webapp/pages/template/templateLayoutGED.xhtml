@@ -30,15 +30,13 @@
 		    
 		    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
 			 
-			<p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
-			    <p:graphicImage library="imagem" name="loading.gif" />
+			<p:dialog header="Processando..." widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+			    <p:graphicImage library="imagem" name="loading.gif" width="100px" height="100px" />
 			</p:dialog>    
 			
 			<p:dialog modal="true" widgetVar="downloadDialog" header="Download..." draggable="false" closable="false" resizable="false">
-			    <p:graphicImage library="imagem" name="loading-bar.gif" style="margin:0 auto; text-align:center;"/>
+			    <p:graphicImage library="imagem" name="loading.gif" width="100px" height="100px"/>
 			</p:dialog>
-			 
-			
 	    </h:form>
 	</body>
 </html>

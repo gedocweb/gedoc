@@ -64,32 +64,30 @@
  	
  	<ui:include src="/pages/template/header.xhtml" />
  	
-	<h:body>     
-		<f:event listener="#{painelAdmin.renderizaMensagensDaSessao()}" type="preRenderView" />
+	<h:body style="background-color: #6e6e6e !important; background-image: url('../../../resources/imagem/azul_degrade.jpg')">     
 	
+		<f:event listener="#{painelAdmin.renderizaMensagensDaSessao()}" type="preRenderView" />
+		
 		<h:form id="form">
 		 
 			<p:growl id="messages" autoUpdate="true" closable="true" style="margin:0 auto; width:80%; text-align:center;" />
 			
-			 <div id="logout" style="margin:0 auto; width:80%; text-align:left;" >
+			 <div id="logout" style="margin:0 auto; width:80%;" >
 			 
-			 	<p:commandButton action="#{painelAdmin.logout()}" icon="ui-icon-power"></p:commandButton>
+				<p:separator></p:separator>
+			 	<p:commandButton action="#{painelAdmin.logout()}" value="Sair" icon="ui-icon-power"  style="text-align:rigth !important;"></p:commandButton>
 			 	<p:separator></p:separator>
-			 	
+			 	<p:outputLabel value="Bem-Vindo: #{painelAdmin.usuarioLogado.pessoa.nome}" style="color:white"></p:outputLabel>
+			 	<br/>
+			 	<p:outputLabel value="Role de acesso: #{painelAdmin.usuarioLogado.role.label}" style="color:white"></p:outputLabel>
+			 	<br/>
+			 	<p:outputLabel value="Grupo de usuários: #{painelAdmin.grupoUsuarioLogado.grupo}" style="color:white"></p:outputLabel>
+			 	<p:separator></p:separator>
 			 </div>
 		
 		    <p:panel id="painel" header="#{msg['MENU01']}" style="margin:0 auto; width:80%; text-align:center;" >
 		    
-			    <p:menubar> 
-			    	
-			    	<p:submenu label="#{msg['MENU02']}" >
-			    		<p:menuitem value="#{msg['GRUPOUSUARIO4']}" url="/pages/admin/grupoUsuario/painelGrupoUsuario.jsf" />
-			    	</p:submenu>
-			    	
-			    	<p:submenu label="#{msg['MENU03']}" >
-			    		<p:menuitem value="#{msg['DOC1']}" url="/pages/admin/documento/painelDocumento.jsf" />
-			    	</p:submenu>
-			    </p:menubar>
+			   <ui:include src="/pages/template/menu.xhtml" />
 		        
 		    </p:panel>
 		    
@@ -97,8 +95,8 @@
 		    
 			<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
 			 
-			<p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
-			    <p:graphicImage library="imagem" name="loading.gif" />
+			<p:dialog header="Processando..." widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+			    <p:graphicImage library="imagem" name="loading.gif" width="100px" height="100px"/>
 			</p:dialog>
 		</h:form>
 	</h:body>

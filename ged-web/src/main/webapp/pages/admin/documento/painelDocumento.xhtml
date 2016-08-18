@@ -20,23 +20,21 @@
 				
 					 <div id="logout" style="margin:0 auto; text-align:left;" >
 					 
-					 	<p:commandButton action="#{painelAdmin.logout()}" icon="ui-icon-power"></p:commandButton>
+					 	<p:separator></p:separator>
+					 	<p:commandButton action="#{painelAdmin.logout()}" value="Sair" icon="ui-icon-power"  style="text-align:rigth !important;"></p:commandButton>
+					 	<p:separator></p:separator>
+					 	<p:outputLabel value="Bem-Vindo: #{painelAdmin.usuarioLogado.pessoa.nome}" style="color:white"></p:outputLabel>
+					 	<br/>
+					 	<p:outputLabel value="Role de acesso: #{painelAdmin.usuarioLogado.role.label}" style="color:white"></p:outputLabel>
+					 	<br/>
+					 	<p:outputLabel value="Grupo de usuários: #{painelAdmin.grupoUsuarioLogado.grupo}" style="color:white"></p:outputLabel>
 					 	<p:separator></p:separator>
 					 	
 					 </div>
 				
 				    <p:panel id="painel" header="#{msg['MENU01']}" style="margin:0 auto; text-align:center;" >
 				    
-					    <p:menubar> 
-					    	
-					    	<p:submenu label="#{msg['MENU02']}" >
-					    		<p:menuitem value="#{msg['GRUPOUSUARIO4']}" url="/pages/admin/grupoUsuario/painelGrupoUsuario.jsf" />
-					    	</p:submenu>
-					    	
-					    	<p:submenu label="#{msg['MENU03']}" >
-					    		<p:menuitem value="#{msg['DOC1']}" url="/pages/admin/documento/painelDocumento.jsf" />
-					    	</p:submenu>
-					    </p:menubar>
+					    <ui:include src="/pages/template/menu.xhtml" />
 				        
 				    </p:panel>
 			    </p:layoutUnit>
@@ -46,9 +44,9 @@
 			        <p:accordionPanel multiple="true" >
 				        <p:tab id="tabCategoria" title="Categoria dos Documentos">
 				        
-			        		<p:commandButton value="Nova Pasta" icon="ui-icon-plus"  oncomplete="PF('dgCategoria').show()"/>
-			        		<p:commandButton value="Alterar" icon="ui-icon-refresh" actionListener="#{painelDocumento.verificaAlteracaoCategoria}" rendered="#{painelDocumento.renderizaBotoesAlterarExcluirCategoria}"/>
-			        		<p:commandButton id="botaoRemover" value="Remover" icon="ui-icon-trash"  actionListener="#{painelDocumento.verificaExclusaoCategoria}" rendered="#{painelDocumento.renderizaBotoesAlterarExcluirCategoria}"/>
+			        		<p:commandButton value="Nova Pasta" icon="ui-icon-plus" actionListener="#{painelDocumento.consultaListGrupoUsuario}"  oncomplete="PF('dgCategoria').show()" rendered="#{painelDocumento.autorizaFuncionalidade('CADASTRAR_CATEGORIA_DOCUMENTO')}"/>
+			        		<p:commandButton value="Alterar" icon="ui-icon-refresh" actionListener="#{painelDocumento.verificaAlteracaoCategoria}" rendered="#{painelDocumento.renderizaBotoesAlterarExcluirCategoria and painelDocumento.autorizaFuncionalidade('ALTERAR_CATEGORIA_DOCUMENTO')}"/>
+			        		<p:commandButton id="botaoRemover" value="Remover" icon="ui-icon-trash"  actionListener="#{painelDocumento.verificaExclusaoCategoria}" rendered="#{painelDocumento.renderizaBotoesAlterarExcluirCategoria and painelDocumento.autorizaFuncionalidade('REMOVER_CATEGORIA_DOCUMENTO')}"/>
 			        		
 			        		<p:separator></p:separator>
 			                
@@ -67,9 +65,9 @@
 				        
 				        <p:tab title="Tipos de Documento" >
 				        	
-				            <p:commandButton value="Novo Tipo" icon="ui-icon-plus" oncomplete="PF('dgTipoDocumento').show()"/>
-				            <p:commandButton value="Alterar" icon="ui-icon-refresh" actionListener="#{painelDocumento.verificaAlteracaoTipoDocumento}" rendered="#{painelDocumento.renderizaBotoesAlterarExcluirTipoDocumento}"/>
-			        		<p:commandButton id="botaoRemoverTipoDoc" value="Remover" icon="ui-icon-trash"  actionListener="#{painelDocumento.verificaExclusaoTipoDocumento}" rendered="#{painelDocumento.renderizaBotoesAlterarExcluirTipoDocumento}"/>
+				            <p:commandButton value="Novo Tipo" icon="ui-icon-plus" oncomplete="PF('dgTipoDocumento').show()" rendered="#{painelDocumento.autorizaFuncionalidade('CADASTRAR_TIPO_DOCUMENTO')}"/>
+				            <p:commandButton value="Alterar" icon="ui-icon-refresh" actionListener="#{painelDocumento.verificaAlteracaoTipoDocumento}" rendered="#{painelDocumento.renderizaBotoesAlterarExcluirTipoDocumento and painelDocumento.autorizaFuncionalidade('ALTERAR_TIPO_DOCUMENTO')}"/>
+			        		<p:commandButton id="botaoRemoverTipoDoc" value="Remover" icon="ui-icon-trash"  actionListener="#{painelDocumento.verificaExclusaoTipoDocumento}" rendered="#{painelDocumento.renderizaBotoesAlterarExcluirTipoDocumento and painelDocumento.autorizaFuncionalidade('REMOVER_TIPO_DOCUMENTO')}"/>
 			        		
 			        		<p:separator></p:separator>
 			        		
@@ -93,98 +91,115 @@
 			    
 			    	<p:outputPanel autoUpdate="true"> 
 		       		
-	       				<p:commandButton value="Novo Documento" action="#{painelDocumento.preparaCadastro}" icon="ui-icon-plus" rendered="#{!painelDocumento.renderizaCadastro or painelDocumento.renderizaAlterar}" />
+	       				<p:commandButton value="Novo Documento" action="#{painelDocumento.preparaCadastro}" icon="ui-icon-plus" rendered="#{(!painelDocumento.renderizaCadastro or painelDocumento.renderizaAlterar) and painelDocumento.autorizaFuncionalidade('CADASTRAR_DOCUMENTO')}" />
 	       				<p:commandButton value="Pesquisa" action="#{painelDocumento.preparaPesquisa}" icon="ui-icon-search" rendered="#{painelDocumento.renderizaCadastro or painelDocumento.renderizaAlterar}" />
 		       		
 		       			<p:separator></p:separator>
 		       		
 		       			<p:fieldset legend="#{painelDocumento.tituloFildSetDocumento}" toggleable="true" toggleSpeed="500" rendered="#{!painelDocumento.renderizaAlterar}">
-		       			
-			       			<h:panelGrid cellpadding="10" columns="4" >
-			       			
-			       				<p:outputLabel value="Categoria:" ></p:outputLabel>
-			       				<p:inputText value="#{painelDocumento.categoriaSelecionada.descricao}" readonly="true" size="30" >
-			       					<p:ajax partialSubmit="true" process="@this"></p:ajax>
-			       				</p:inputText>
-			       				
-			       				<p:outputLabel value="Tipo do documento:"></p:outputLabel>
-			       				<p:inputText value="#{painelDocumento.tipoDocumentoSelecionado.descricao}" readonly="true" size="30">
-			       					<p:ajax partialSubmit="true" process="@this" event="change" global="false"></p:ajax>
-			       				</p:inputText>
-			       				
-			       				<p:outputLabel value="Nome do documento:"></p:outputLabel>
-			       				<p:inputText value="#{painelDocumento.documento.descricao}" size="30">
-			       					<p:ajax partialSubmit="true" process="@this" event="change" global="false"></p:ajax>
-			       				</p:inputText>
-			       				
-			       				<p:outputLabel value="Interessado:"></p:outputLabel>
-			       				<p:inputText value="#{painelDocumento.usuarioLogado.pessoa.nome}" readonly="true" size="30">
-			       					<p:ajax partialSubmit="true" process="@this" event="change" global="false"></p:ajax>
-			       				</p:inputText>
-			       				
+		       				
+		       				<h:panelGrid columns="2" cellpadding="10" rendered="#{!painelDocumento.renderizaCadastro and !painelDocumento.renderizaAlterar}">
+		       					
+		       					<p:selectBooleanCheckbox itemLabel="Incluir sub categorias na pesquisa" label="Incluir sub categorias na pesquisa" value="#{painelDocumento.pesquisarSubCategorias}">
+		       					</p:selectBooleanCheckbox>
+		       					
+		       					<p:selectBooleanCheckbox itemLabel="Incluir todos os tipos de documento na pesquisa" label="Incluir todos os tipos de documento na pesquisa" value="#{painelDocumento.pesquisarTodosTiposDocuemento}">
+		       					</p:selectBooleanCheckbox>
+		       				
 		       				</h:panelGrid>
 		       				
-		       				<h:panelGrid cellpadding="10" columns="2"  >
+			       			<h:panelGrid cellpadding="10" columns="4" >
+			       			
+	       						<p:outputLabel value="Categoria:" ></p:outputLabel>
+			       				<p:inputText id="txtCategoria" value="#{painelDocumento.categoriaSelecionada.descricao}" readonly="true" size="30" >
+			       					<p:ajax partialSubmit="true" process="@form"></p:ajax>
+			       				</p:inputText>
+					       				
+	       						<p:outputLabel value="Tipo do documento:"></p:outputLabel>
+			       				<p:inputText id="txtTipoDoc" value="#{painelDocumento.tipoDocumentoSelecionado.descricao}" readonly="true" size="30">
+			       					<p:ajax partialSubmit="true" process="@form" event="change" global="false"></p:ajax>
+			       				</p:inputText>
+			       					
+	       						<p:outputLabel value="Nome do documento:"></p:outputLabel>
+	       						<p:inputText value="#{painelDocumento.documento.descricao}" size="30">
+			       					<p:ajax partialSubmit="true" process="@form" event="change" global="false"></p:ajax>
+			       				</p:inputText>
+	       					
+	       						<p:outputLabel value="Interessado:"></p:outputLabel>
+			       				<p:inputText value="#{painelDocumento.usuarioLogado.pessoa.nome}" readonly="true" size="30">
+			       					<p:ajax partialSubmit="true" process="@form" event="change" global="false"></p:ajax>
+			       				</p:inputText>
 			       				
 			       				<p:outputLabel value="Observação:"></p:outputLabel>
-			       				<p:inputTextarea value="#{painelDocumento.documento.observacao}" style="width:200px">
-			       					<p:ajax partialSubmit="true" process="@this" event="change" global="false"></p:ajax>
+								<p:inputTextarea value="#{painelDocumento.documento.observacao}" style="width:200px">
+			       					<p:ajax partialSubmit="true" process="@form" event="change" global="false"></p:ajax>
 			       				</p:inputTextarea>
 			       				
 			       				<p:outputLabel value="Data do Documento:" rendered="#{painelDocumento.renderizaCadastro}"></p:outputLabel>
-			       				<p:calendar value="#{painelDocumento.documento.dataDocumento}" rendered="#{painelDocumento.renderizaCadastro}">
-			       					<p:ajax partialSubmit="true" process="@this" event="dateSelect" global="false"></p:ajax>
+								<p:calendar value="#{painelDocumento.documento.dataDocumento}" rendered="#{painelDocumento.renderizaCadastro}">
+			       					<p:ajax partialSubmit="true" process="@form" event="dateSelect" global="false"></p:ajax>
 			       				</p:calendar>
 			       				
-			       			</h:panelGrid>
-			       			
-			       			<h:panelGrid cellpadding="10" columns="2"  >	
-			       				<p:outputLabel value="Upload documento digitalizado" rendered="#{painelDocumento.renderizaCadastro}"></p:outputLabel>
-			       				
-			       				<h:form id="formUpload" enctype="multipart/form-data" rendered="#{painelDocumento.renderizaCadastro and !painelDocumento.arquivoAnexado}">
-									<p:fileUpload label="Selecione o arquivo do computador"  value="#{painelDocumento.uploadFile}" fileUploadListener="#{painelDocumento.upload}" auto="true" rendered="#{painelDocumento.renderizaCadastro and !painelDocumento.arquivoAnexado}" />		       				
+		       					<p:outputLabel value="Upload documento digitalizado" rendered="#{painelDocumento.renderizaCadastro}"></p:outputLabel>
+			       				<h:form id="formUpload" enctype="multipart/form-data;charset=UTF-8" acceptcharset="UTF-8" rendered="#{painelDocumento.renderizaCadastro and !painelDocumento.arquivoAnexado}">
+									<p:fileUpload label="Selecione o arquivo do computador"  value="#{painelDocumento.uploadFile}"  sizeLimit="10485760" allowTypes="/(\.|\/)(gif|jpe?g|png|pdf|docx)$/" invalidSizeMessage="Arquivo inválido, são permitidos somente: docx, pdf, gif, jpg, jpeg e png."
+									fileUploadListener="#{painelDocumento.upload}" auto="true" rendered="#{painelDocumento.renderizaCadastro and !painelDocumento.arquivoAnexado}" />
 			       				</h:form>
 			       				
 			       				<p:outputPanel autoUpdate="true" id="panelTeste" rendered="#{painelDocumento.arquivoAnexado and painelDocumento.renderizaCadastro}" >
 			       					<p:outputLabel value="#{painelDocumento.documento.arquivo.descricao}">
 			       					</p:outputLabel>
 			       					<p:selectBooleanCheckbox label="Substituir documento anexado" value="#{painelDocumento.arquivoAnexado}" rendered="#{painelDocumento.renderizaCadastro}">
-			       						<p:ajax event="change" update="form:panelTeste"></p:ajax>
+			       						<p:ajax event="change" update="form:panelTeste" partialSubmit="true" process="@this"></p:ajax>
 			       					</p:selectBooleanCheckbox>
-			       				</p:outputPanel>
-			       				
+			       					
+			       					<br/>
+			       					
+			       					<p:selectBooleanCheckbox  itemLabel="Converter arquivo para pdf" label="Converter arquivo para pdf" value="#{painelDocumento.converterArquivoParaPDF}" rendered="#{painelDocumento.renderizaCadastro and painelDocumento.extensaoArquivoDiferentePDF}">
+			       						<p:ajax partialSubmit="true" process="@this"></p:ajax>
+       								</p:selectBooleanCheckbox>		 
+		       				 	</p:outputPanel>
 			       			</h:panelGrid>
 			       			
-			       			<h:panelGrid cellpadding="10" columns="4" rendered="#{!painelDocumento.renderizaCadastro}">
+			       			<p:separator rendered="#{!painelDocumento.renderizaCadastro}"></p:separator>
 			       			
-			       				<p:outputLabel value="Período data da última alteração:" for="calendaDeAlteracao" rendered="#{!painelDocumento.renderizaCadastro}"></p:outputLabel>
-				       			<p:calendar id="calendaDeAlteracao" value="#{painelDocumento.filtroDocumentoDTO.dataUltimaALteracao.dataInicio}" rendered="#{!painelDocumento.renderizaCadastro}"></p:calendar>
-				       			<p:outputLabel value="até:" for="calendarAteAlteracao" rendered="#{!painelDocumento.renderizaCadastro}"></p:outputLabel>
-				       			<p:calendar id="calendarAteAlteracao" value="#{painelDocumento.filtroDocumentoDTO.dataUltimaALteracao.dataFim}" rendered="#{!painelDocumento.renderizaCadastro}"></p:calendar>
+		       				<h:panelGrid columns="1" cellpadding="10" rendered="#{!painelDocumento.renderizaCadastro}" style="margin:0 auto; ">
+		       					
+		       					<p:panel header="Filtro por período"  >
+		       						
+				       				<h:panelGrid columns="4" cellpadding="10">
+			       						<p:outputLabel value="Período data da última alteração:" for="calendaDeAlteracao"></p:outputLabel>
+			       						<p:calendar id="calendaDeAlteracao" value="#{painelDocumento.filtroDocumentoDTO.dataUltimaALteracao.dataInicio}" ></p:calendar>
+						       			<p:outputLabel value="até:" for="calendarAteAlteracao" ></p:outputLabel>
+						       			<p:calendar id="calendarAteAlteracao" value="#{painelDocumento.filtroDocumentoDTO.dataUltimaALteracao.dataFim}"></p:calendar>
 				       			
-			       			</h:panelGrid>	
+				       					<p:outputLabel value="Período data do documento de:" for="calendaDeDocumento" ></p:outputLabel>
+						       			<p:calendar id="calendaDeDocumento" value="#{painelDocumento.filtroDocumentoDTO.dataDocumento.dataInicio}" ></p:calendar>
+						       			<p:outputLabel value="até:" for="calendarAteDocumento" ></p:outputLabel>
+						       			<p:calendar id="calendarAteDocumento" value="#{painelDocumento.filtroDocumentoDTO.dataDocumento.dataFim}" ></p:calendar>
 			       				
-			       			<h:panelGrid cellpadding="10" columns="8" rendered="#{!painelDocumento.renderizaCadastro}">	
+				       					<p:outputLabel value="Período da inclusão do documento de:" for="calendaDe"></p:outputLabel>
+				       					<p:calendar id="calendaDe" value="#{painelDocumento.filtroDocumentoDTO.dataInclusaoDocumento.dataInicio}"></p:calendar>
+				       					<p:outputLabel value="até:" for="calendarAte" rendered="#{!painelDocumento.renderizaCadastro}"></p:outputLabel>
+				       					<p:calendar id="calendarAte" value="#{painelDocumento.filtroDocumentoDTO.dataInclusaoDocumento.dataFim}"></p:calendar>
+				       				</h:panelGrid>
+		       					
+		       					</p:panel>
+		       				
+		       				</h:panelGrid>
+		       				
+		       				<p:tooltip id="toolTipCategoria" for="txtCategoria" value="Selecione a categoria na aba de configuração."
+						               showEffect="clip" hideEffect="explode" position="top"/>
+						    
+						    <p:tooltip id="toolTipTipoDocumento" for="txtTipoDoc" value="Selecione o tipo de documento na aba de configuração."
+						               showEffect="clip" hideEffect="explode" position="top"/>
 			       				
-			       				<p:outputLabel value="Período data do documento de:" for="calendaDeDocumento" rendered="#{!painelDocumento.renderizaCadastro}"></p:outputLabel>
-				       			<p:calendar id="calendaDeDocumento" value="#{painelDocumento.filtroDocumentoDTO.dataDocumento.dataInicio}" rendered="#{!painelDocumento.renderizaCadastro}"></p:calendar>
-				       			<p:outputLabel value="até:" for="calendarAteDocumento" rendered="#{!painelDocumento.renderizaCadastro}"></p:outputLabel>
-				       			<p:calendar id="calendarAteDocumento" value="#{painelDocumento.filtroDocumentoDTO.dataDocumento.dataFim}" rendered="#{!painelDocumento.renderizaCadastro}"></p:calendar>
-				       			
-		       					<p:outputLabel value="Período da inclusão do documento de:" for="calendaDe" rendered="#{!painelDocumento.renderizaCadastro}"></p:outputLabel>
-				       			<p:calendar id="calendaDe" value="#{painelDocumento.filtroDocumentoDTO.dataInclusaoDocumento.dataInicio}" rendered="#{!painelDocumento.renderizaCadastro}"></p:calendar>
-				       			<p:outputLabel value="até:" for="calendarAte" rendered="#{!painelDocumento.renderizaCadastro}"></p:outputLabel>
-				       			<p:calendar id="calendarAte" value="#{painelDocumento.filtroDocumentoDTO.dataInclusaoDocumento.dataFim}" rendered="#{!painelDocumento.renderizaCadastro}"></p:calendar>
-				       			
-			       			</h:panelGrid>	
-			       			
-				       			
 			       			<p:separator></p:separator>
 			       			
 			       			<h:panelGrid style="margin:0 auto; text-align:center;" >
 			       			
-			       				<p:commandButton  value="Pesquisar" type="submit" actionListener="#{painelDocumento.pesquisar}" rendered="#{!painelDocumento.renderizaCadastro}" ></p:commandButton>
-			       				<p:commandButton  value="Cadastrar" type="submit" action="#{painelDocumento.cadastrarDocumento}" rendered="#{painelDocumento.renderizaCadastro}" ></p:commandButton>
+			       				<p:commandButton  value="Pesquisar" type="submit" action="#{painelDocumento.pesquisar}" rendered="#{!painelDocumento.renderizaCadastro}" ></p:commandButton>
+			       				<p:commandButton  value="Cadastrar" type="submit" action="#{painelDocumento.cadastrarDocumento}" rendered="#{painelDocumento.renderizaCadastro and painelDocumento.autorizaFuncionalidade('CADASTRAR_DOCUMENTO')}" ></p:commandButton>
 			       			
 			       			</h:panelGrid>
 		       			
@@ -228,10 +243,11 @@
 			       				
 			       				<p:outputPanel autoUpdate="true" rendered="#{!painelDocumento.arquivoAnexado}">
 			       				
-			       					<h:form id="formUploadAlterar" enctype="multipart/form-data" >
-										<p:fileUpload label="Selecione o arquivo do computador"  value="#{painelDocumento.uploadFile}" fileUploadListener="#{painelDocumento.uploadAlterar}" auto="true" />		       				
+			       					<h:form id="formUploadAlterar" enctype="multipart/form-data;charset=UTF-8" acceptcharset="UTF-8">
+										<p:fileUpload label="Selecione o arquivo do computador"  sizeLimit="10485760" allowTypes="/(\.|\/)(gif|jpe?g|png|pdf|docx)$/" invalidSizeMessage="Arquivo inválido, são permitidos somente: docx, pdf, gif, jpg, jpeg e png."
+										value="#{painelDocumento.uploadFile}"  fileUploadListener="#{painelDocumento.uploadAlterar}" auto="true" />		       				
 				       				</h:form>
-			       				
+				       				
 			       				</p:outputPanel>
 			       				
 			       				<p:outputPanel autoUpdate="true" id="panelTesteAlterar" rendered="#{painelDocumento.arquivoAnexado}" >
@@ -242,6 +258,12 @@
 			       						<p:ajax event="change" update="form:panelTesteAlterar"></p:ajax>
 			       					</p:selectBooleanCheckbox>
 			       					
+			       					<br/>
+			       					
+			       					<p:selectBooleanCheckbox  itemLabel="Converter arquivo para pdf" label="Converter arquivo para pdf" value="#{painelDocumento.converterArquivoParaPDF}" rendered="#{painelDocumento.renderizaAlterar and painelDocumento.extensaoArquivoDiferentePDF}">
+				       						<p:ajax partialSubmit="true" process="@this"></p:ajax>
+	       								</p:selectBooleanCheckbox>	
+			       					
 			       				</p:outputPanel>
 			       				
 			       			</h:panelGrid>
@@ -250,7 +272,7 @@
 			       			
 			       			<h:panelGrid style="margin:0 auto; text-align:center;" >
 			       			
-			       				<p:commandButton  value="Alterar" type="submit" actionListener="#{painelDocumento.alterarDocumento}" ></p:commandButton>
+			       				<p:commandButton  value="Alterar" type="submit" actionListener="#{painelDocumento.alterarDocumento}" rendered="#{painelDocumento.autorizaFuncionalidade('ALTERAR_DOCUMENTO')}"></p:commandButton>
 			       			
 			       			</h:panelGrid>
 		       			
@@ -265,36 +287,42 @@
 							        
 							            <h:panelGrid columns="1" style="width:100%">
 							            
-							            	<p:remoteCommand name="rc"  actionListener="#{basicDocumentViewerController.carregaStreamArquivo(doc.id)}" oncomplete="PF('docView').show()" />
+							            	<p:remoteCommand name="rc" oncomplete="PF('docObservacao').show()" >
+							            		<f:setPropertyActionListener value="#{doc.observacao}" target="#{obsDocumento.observacaoDoc}"></f:setPropertyActionListener>
+							            	</p:remoteCommand>
 							            
 							            	<h:graphicImage ondblclick="rc()" alt="Arquivo PDF" id="iconPdf" value="icon/pdf.png" rendered="#{doc.arquivo.pdf}"/>
+							            	<h:graphicImage ondblclick="rc()" alt="Imagem" id="iconImagem" value="icon/imagem.png" rendered="#{doc.arquivo.imagem}" />
+							            	<h:graphicImage ondblclick="rc()" alt="Imagem" id="iconWord" value="icon/word.png" rendered="#{doc.arquivo.word}" />
+							            	
 							            	<p:outputLabel value="#{doc.arquivo.descricao}" style="font-weight:bold"></p:outputLabel>
 							            	
 							            	<p:separator></p:separator>
 							            	
 							            	<h:outputText value="Tipo: #{doc.tipoDocumento.descricao}"/>
     									    <h:outputText value="Categoria: #{doc.categoria.descricao}"/>
+    									    <h:outputText value="Data: #{doc.dataDocumentoFormat}"></h:outputText>
+    									    <h:outputText value="Última Modificação: #{doc.dataUltimaAlteracaoFormat}"></h:outputText>
+    									    <h:outputText value="Autor: #{doc.usuario.pessoa.nome}"></h:outputText>
 								            	
-							            	<h:graphicImage alt="Imagem" id="iconImagem" value="icon/imagem.png" rendered="#{doc.arquivo.imagem}" />
-							 				
 							 				<h:panelGrid columns="4" style="width:50px;margin:0 auto; text-align:center;">
 							 				
-								                <p:commandButton icon="ui-icon-search" title="Visualizar" oncomplete="PF('docView').show()" rendered="#{doc.arquivo.pdf}">
-								                	<p:ajax event="click" listener="#{basicDocumentViewerController.carregaStreamArquivo(doc.id)}"></p:ajax>
+								                <p:commandButton icon="ui-icon-search" title="Visualizar" oncomplete="PF('docView').show()" rendered="#{doc.arquivo.pdf and painelDocumento.autorizaFuncionalidade('VISUALIZAR_DOCUMENTO')}">
+								                	<p:ajax event="click" listener="#{basicDocumentViewerController.carregaStreamArquivo(doc.id)}" ></p:ajax>
 								                </p:commandButton>
 								                
-								                <p:commandButton icon="ui-icon-search" title="Visualizar" oncomplete="PF('imagemView').show()" rendered="#{doc.arquivo.imagem}">
+								                <p:commandButton icon="ui-icon-search" title="Visualizar" oncomplete="PF('imagemView').show()" rendered="#{doc.arquivo.imagem and painelDocumento.autorizaFuncionalidade('VISUALIZAR_DOCUMENTO')}">
 								                	<f:setPropertyActionListener value="#{doc.id}" target="#{basicDocumentViewerController.docId}"></f:setPropertyActionListener>
 								                </p:commandButton>
 								                
-								                <p:commandButton icon="ui-icon-refresh" title="Alterar" action="#{painelDocumento.preparaAlterar(doc)}"/>
+								                <p:commandButton icon="ui-icon-refresh" title="Alterar" action="#{painelDocumento.preparaAlterar(doc)}" rendered="#{painelDocumento.autorizaFuncionalidade('ALTERAR_DOCUMENTO')}"/>
 								                
-								                <p:commandButton ajax="false" title="Download" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-arrowthickstop-1-s">
+								                <p:commandButton ajax="false" title="Download" onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-arrowthickstop-1-s" rendered="#{painelDocumento.autorizaFuncionalidade('BAIXAR_DOCUMENTO')}">
 								                	<f:setPropertyActionListener value="#{doc.id}" target="#{basicDocumentViewerController.docId}"></f:setPropertyActionListener>
 											        <p:fileDownload value="#{basicDocumentViewerController.streamedImageById}"  />
 											    </p:commandButton>
 											    
-								                <p:commandButton icon="ui-icon-trash" title="Remover" oncomplete="PF('confirmaExclusaoDoc').show()">
+								                <p:commandButton icon="ui-icon-trash" title="Remover" oncomplete="PF('confirmaExclusaoDoc').show()" rendered="#{painelDocumento.autorizaFuncionalidade('REMOVER_DOCUMENTO')}">
 								                	<f:setPropertyActionListener value="#{doc}" target="#{painelDocumento.documentoSelecionado}"></f:setPropertyActionListener>
 								                </p:commandButton>
 								                
@@ -310,21 +338,29 @@
 			 
 			</p:layout>
 			
-			<p:dialog id="docView" header="Documento" widgetVar="docView" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
+			<p:dialog position="top" id="docObsercacao" header="Observação" widgetVar="docObservacao" modal="true" closable="true" showEffect="fade" hideEffect="fade" >
 			        
 			 	<p:outputPanel autoUpdate="true">
-					<pe:documentViewer height="700" width="800" value="#{basicDocumentViewerController.content}" cache="true" />		 	
+					<p:outputLabel value="#{obsDocumento.observacaoDoc}"></p:outputLabel>		 	
+			 	</p:outputPanel>       
+			 </p:dialog>
+			
+			<p:dialog  id="docView" header="Documento" widgetVar="docView" position="top" modal="true" showEffect="fade" hideEffect="fade" resizable="true" style="text-align:center !important; border:none !important;" >
+			        
+			 	<p:outputPanel autoUpdate="true" >
+					<p:media player="pdf" height="700" width="800" value="#{basicDocumentViewerController.content}" cache="true"  />		 	
 			 	</p:outputPanel>       
 			 </p:dialog>
 			 
-			 <p:dialog id="imagemView" header="Documento" widgetVar="imagemView" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
+			 <p:dialog position="top" id="imagemView" header="Documento" widgetVar="imagemView" modal="true" showEffect="fade" hideEffect="fade" resizable="true" style="text-align:center !important; border:none !important;" >
 			        
 			 	<p:outputPanel autoUpdate="true">
-					<p:graphicImage height="700" width="800" value="#{basicDocumentViewerController.streamedImageById}" cache="true" />		 	
+ 
+					<p:graphicImage id="imageDoc" height="700" width="800" value="#{basicDocumentViewerController.streamedImageById}" cache="true" />		 	
 			 	</p:outputPanel>       
 			 </p:dialog>
 			 
-			 <p:dialog id="alertaExclusaoDocumento" header="#{msg['MG22']}" widgetVar="confirmaExclusaoDoc" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
+			 <p:dialog position="top" id="alertaExclusaoDocumento" header="#{msg['MG22']}" widgetVar="confirmaExclusaoDoc" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
 		        <p:outputPanel id="confirmaExclusaoDoc" style="text-align:center; border:none !important;">
 		            <h:panelGrid style="border:none !important;">
 		 
@@ -347,7 +383,7 @@
 		        </p:outputPanel>
 		    </p:dialog>
 			 
-		 	<p:dialog  id="infoNovaPasta"  header="Criar nova categoria de documento" widgetVar="dgCategoria" width="40%" modal="true" showEffect="fade" hideEffect="fade" style="text-align:center; border:none !important;">
+		 	<p:dialog  id="infoNovaPasta" position="top" header="Criar nova categoria de documento" widgetVar="dgCategoria" width="40%" modal="true" showEffect="fade" hideEffect="fade" style="text-align:center; border:none !important;">
 		    		
 	    		<p:outputPanel autoUpdate="true">
 	    		
@@ -362,27 +398,37 @@
 		       			</p:selectBooleanCheckbox>
 				        
 			    	</p:panel>	
-	    		
-	    		</p:outputPanel>
 			    	
-	      		<p:separator></p:separator>
+	      			<p:separator></p:separator>
 	      		
-	      		<h:panelGrid cellpadding="10" columns="2" >
-	      			
-	      			<p:outputLabel value="Nome do Diretório:"></p:outputLabel>
-	      			<p:inputText value="#{painelDocumento.categoria.descricao}" size="50"></p:inputText>
-	      			
-	      		</h:panelGrid>
+		      		<h:panelGrid cellpadding="10" columns="2" >
+		      			
+		      			<p:outputLabel value="Nome do Diretório:"></p:outputLabel>
+		      			<p:inputText value="#{painelDocumento.categoria.descricao}" size="50" >
+		      				<p:ajax  partialSubmit="true" process="@this" ignoreAutoUpdate="true"></p:ajax>
+		      			</p:inputText>
+		      			
+		      		</h:panelGrid>
 	      		
+		      		<p:panel id="panelGrupoUsuarios" header="Grupos de usuários que terão acesso *" style="margin-bottom:20px" cellpadding="10">
+				    	 <p:commandButton value="Todos os grupos" actionListener="#{painelDocumento.selecionaTodosGruposUsuario}"></p:commandButton>
+				    	 <p:separator></p:separator>
+				    	 <p:selectManyCheckbox  value="#{painelDocumento.listGrupoUsuarioCategoriaSelecionados}" layout="responsive" columns="1">
+				    	 	<p:ajax  partialSubmit="true" process="@this"></p:ajax>
+					        <f:selectItems value="#{painelDocumento.listGrupoUsuarioCategoria}" />
+				    	 </p:selectManyCheckbox>
+				    	 
+			    	 </p:panel>
+	      		</p:outputPanel>
 	      		<p:separator></p:separator>
 	          		
 	      		<h:panelGrid cellpadding="10" columns="2" style="margin:0 auto;" >
-		       		<p:commandButton oncomplete="PF('dgCategoria').hide()" value="#{msg['MG08']}" action="#{painelDocumento.novaCategoria}" update="@form" ></p:commandButton>
+		       		<p:commandButton value="#{msg['MG08']}" action="#{painelDocumento.novaCategoria}"></p:commandButton>
 		       		<p:commandButton oncomplete="PF('dgCategoria').hide()" value="#{msg['MG24']}"></p:commandButton>
 	      		</h:panelGrid>
 		    </p:dialog>
 		    
-		    <p:dialog  id="infoAlterarPasta"  header="Alterar nome do diretório" widgetVar="dgAlterarCategoria" width="40%" modal="true" showEffect="fade" hideEffect="fade" style="text-align:center; border:none !important;">
+		    <p:dialog position="top"  id="infoAlterarPasta"  header="Alterar nome do diretório" widgetVar="dgAlterarCategoria" width="40%" modal="true" showEffect="fade" hideEffect="fade" style="text-align:center; border:none !important;">
 		    		
 	      		<p:separator></p:separator>
 	      		
@@ -391,21 +437,34 @@
 	      			<h:panelGrid cellpadding="10" columns="2" >
 	      			
 		      			<p:outputLabel value="Nome do Diretório:"></p:outputLabel>
-		      			<p:inputText value="#{painelDocumento.categoriaSelecionada.descricao}" size="50"></p:inputText>
+		      			<p:inputText value="#{painelDocumento.categoriaSelecionada.descricao}" size="50">
+		      				<p:ajax  partialSubmit="true" process="@this"></p:ajax>
+		      			</p:inputText>
 		      			
 		      		</h:panelGrid>
+		      		
+		      		<p:panel  header="Grupos de usuários que terão acesso *" style="margin-bottom:20px" cellpadding="10">
+				    	 
+				    	 <p:commandButton value="Todos os grupos" actionListener="#{painelDocumento.selecionaTodosGruposUsuario}"></p:commandButton>
+				    	 <p:separator></p:separator>
+				    	 <p:selectManyCheckbox   value="#{painelDocumento.listGrupoUsuarioCategoriaSelecionados}" layout="responsive" columns="1">
+				    	 	<p:ajax  partialSubmit="true" process="@this"></p:ajax>
+					        <f:selectItems value="#{painelDocumento.listGrupoUsuarioCategoria}" />
+				    	 </p:selectManyCheckbox>
+				    	 
+			    	 </p:panel>
 	      		
 	      		</p:outputPanel>
 	      		
 	      		<p:separator></p:separator>
 	          		
 	      		<h:panelGrid cellpadding="10" columns="2" style="margin:0 auto;" >
-		       		<p:commandButton oncomplete="PF('dgAlterarCategoria').hide()" value="Alterar" action="#{painelDocumento.alterarCategoria}" update="@form" ></p:commandButton>
+		       		<p:commandButton value="Alterar" action="#{painelDocumento.alterarCategoria}" ></p:commandButton>
 		       		<p:commandButton oncomplete="PF('dgAlterarCategoria').hide()" value="#{msg['MG24']}"></p:commandButton>
 	      		</h:panelGrid>
 		    </p:dialog>
 		    
-		    <p:dialog id="alertaExclusaoCategoria" header="#{msg['MG22']}" widgetVar="confirmaExclusaoCategoria" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
+		    <p:dialog position="top" id="alertaExclusaoCategoria" header="#{msg['MG22']}" widgetVar="confirmaExclusaoCategoria" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
 		        <p:outputPanel id="confirmaExclusao" style="text-align:center; border:none !important;">
 		            <h:panelGrid style="border:none !important;">
 		 
@@ -428,7 +487,7 @@
 		        </p:outputPanel>
 		    </p:dialog>
 		    
-		    <p:dialog  id="infoNovoTipoDocumento"  header="Criar novo tipo de documento" widgetVar="dgTipoDocumento" width="40%" modal="true" showEffect="fade" hideEffect="fade" style="text-align:center; border:none !important;">
+		    <p:dialog position="top"  id="infoNovoTipoDocumento"  header="Criar novo tipo de documento" widgetVar="dgTipoDocumento" width="40%" modal="true" showEffect="fade" hideEffect="fade" style="text-align:center; border:none !important;">
 		    		
 	      		<p:separator></p:separator>
 	      		
@@ -447,7 +506,7 @@
 	      		</h:panelGrid>
 		    </p:dialog>
 		    
-		    <p:dialog id="alertaExclusaoTipoDocumento" header="#{msg['MG22']}" widgetVar="confirmaExclusaoTipoDoc" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
+		    <p:dialog position="top" id="alertaExclusaoTipoDocumento" header="#{msg['MG22']}" widgetVar="confirmaExclusaoTipoDoc" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
 		        <p:outputPanel id="confirmaExclusaoTipoDoc" style="text-align:center; border:none !important;">
 		            <h:panelGrid style="border:none !important;">
 		 
@@ -470,7 +529,7 @@
 		        </p:outputPanel>
 		    </p:dialog>
 		    
-		    <p:dialog  id="infoAlterarTpDoc"  header="Alterar tipo de documento" widgetVar="dgAlterarTipoDocumento" width="40%" modal="true" showEffect="fade" hideEffect="fade" style="text-align:center; border:none !important;">
+		    <p:dialog position="top"  id="infoAlterarTpDoc"  header="Alterar tipo de documento" widgetVar="dgAlterarTipoDocumento" width="40%" modal="true" showEffect="fade" hideEffect="fade" style="text-align:center; border:none !important;">
 		    		
 	      		<p:separator></p:separator>
 	      		
@@ -488,8 +547,8 @@
 	      		<p:separator></p:separator>
 	          		
 	      		<h:panelGrid cellpadding="10" columns="2" style="margin:0 auto;" >
-		       		<p:commandButton oncomplete="PF('dgAlterarCategoria').hide()" value="Alterar" action="#{painelDocumento.alterarTipoDocumento}" update="@form" ></p:commandButton>
-		       		<p:commandButton oncomplete="PF('dgAlterarCategoria').hide()" value="#{msg['MG24']}"></p:commandButton>
+		       		<p:commandButton oncomplete="PF('dgAlterarTipoDocumento').hide()" value="Alterar" action="#{painelDocumento.alterarTipoDocumento}" update="@form" ></p:commandButton>
+		       		<p:commandButton oncomplete="PF('dgAlterarTipoDocumento').hide()" value="#{msg['MG24']}"></p:commandButton>
 	      		</h:panelGrid>
 		    </p:dialog>
 	</ui:define>

@@ -3,7 +3,7 @@
 		      	xmlns:h="http://java.sun.com/jsf/html"
 		      	xmlns:f="http://java.sun.com/jsf/core"
 		      	xmlns:p="http://primefaces.org/ui"
-		      	ged="/pages/admin/gedPaginasAdmin.xhtml">
+		      	template="/pages/admin/templatePaginasAdmin.xhtml">
 
 	<ui:define name="title">Listagem Usuário</ui:define>
 
@@ -11,25 +11,24 @@
 	
 		<p:panel id="pesquisa" header="Listagem Usuário" style="margin:0 auto; width:80%; text-align:center;" >
 		    
-		    <h:panelGrid columns="2" cellpadding="10" style="margin:0 auto;">
+		    <h:panelGrid columns="2" cellpadding="10" style="margin:0 auto;" rendered="#{painelUsuario.autorizaFuncionalidade('PESQUISAR_USUARIO')}">
 
-				<p:outputLabel for="nome" value="#{msg['MSI106']}" />
+				<p:outputLabel for="nome" value="Nome do usuario" />
 		
-				<p:inputTextarea id="nome"
+				<p:inputText id="nome"
 					value="#{painelUsuario.filtroUsuarioDTO.usuario}" maxlength="100"
-					style="width:250px" />
+					 />
 		
 			</h:panelGrid>
 		    
 		    <h:panelGrid columns="3" cellpadding="10" style="margin:0 auto;">
 		
-				<p:commandButton id="btnPesquisar" value="#{msg['MG16']}"
+				<p:commandButton id="btnPesquisar" value="#{msg['MG16']}" rendered="#{painelUsuario.autorizaFuncionalidade('PESQUISAR_USUARIO')}"
 					action="#{painelUsuario.pesquisar()}" update="@form" />
-				<p:commandButton id="btnLimpar" value="#{msg['MG17']}"
+				<p:commandButton id="btnLimpar" value="#{msg['MG17']}" 
 					action="#{painelUsuario.inicio()}" update="@form" />
-				<p:commandButton id="btnCadastrar" value="#{msg['MG18']}"
-					action="#{painelUsuario.redirecionaPagina('CADASTRAR_USUARIO')}"
-					rendered="#{painelUsuario.autorizaFuncionalidade('CADASTRAR_USUARIO')}" />
+				<p:commandButton id="btnCadastrar" value="#{msg['MG18']}" ajax="false" rendered="#{painelUsuario.autorizaFuncionalidade('CADASTRAR_USUARIO')}"
+					action="#{painelUsuario.redirecionaPagina('CADASTRAR_USUARIO')}"/>
 		
 			</h:panelGrid>
 
@@ -41,25 +40,148 @@
 	    	
 	    	 <p:dataTable id="gridusuario" var="usuario" value="#{painelUsuario.listUsuario}" emptyMessage="#{msg['MG19']}">
 		        
-		        <p:column headerText="#{msg['MSI106']}">
-		            <h:outputText value="#{usuario.pessoa.nome}" rendered="#{usuario.pessoa != null}"/>
-		            <h:outputText value="#{usuario.funcionario.pessoa.nome}" rendered="#{usuario.funcionario != null}"/>
+		        <p:column headerText="Nome">
+		            <h:outputText value="#{usuario.pessoa.nome}" />
 		        </p:column>
 		        
-		        <p:column headerText="#{msg['MSI108']}">
-		            <h:outputText value="#{usuario.pessoa.cpf}" rendered="#{usuario.pessoa != null}"/>
-		            <h:outputText value="#{usuario.funcionario.pessoa.cpf}" rendered="#{usuario.funcionario != null}"/>
+		        <p:column headerText="Usuário">
+		            <h:outputText value="#{usuario.usuario}"/>
 		        </p:column>
 		        
-		        <p:column headerText="#{msg['MSI165']}">
+		        <p:column headerText="Role">
 		            <h:outputText value="#{usuario.role.label}" />
 		        </p:column>
 		        
-		        <p:column style="width:40px;text-align: center;margin:0 auto;" rendered="#{painelUsuario.autorizaFuncionalidade('ALTERAR_USUARIO')}">
-		             <p:commandButton icon="ui-icon-refresh" title="#{msg['MG20']}" action="#{painelUsuario.redirecionaParaTelaAlterar(usuario)}"/>
+	         	<p:column style="text-align: center;margin:0 auto;" >
+		             <p:commandButton value="Renovar senha" icon="ui-icon-refresh" title="Alterar Senha" oncomplete="PF('alterarSenha').show()" rendered="#{painelUsuario.autorizaFuncionalidade('ALTERAR_SENHA_USUARIO') and painelUsuario.permissaoAdmin(usuario)}">
+		             	<f:setPropertyActionListener value="#{usuario}" target="#{alterarUsuario.usuario}"></f:setPropertyActionListener>
+		             </p:commandButton>
+		        </p:column>
+		        
+		        <p:column style="width:40px;text-align: center;margin:0 auto;" headerText="Alterar">
+		             <p:commandButton icon="ui-icon-refresh" title="#{msg['MG20']}" action="#{alterarUsuario.preAlteracao}" rendered="#{painelUsuario.autorizaFuncionalidade('ALTERAR_USUARIO') and painelUsuario.permissaoAdmin(usuario)}">
+		             	<f:setPropertyActionListener value="#{usuario}" target="#{alterarUsuario.usuario}"></f:setPropertyActionListener>
+		             </p:commandButton>
+		        </p:column>
+		        
+		        <p:column style="width:40px;text-align: center;margin:0 auto;" headerText="Excluir">
+		             <p:commandButton oncomplete="PF('confirmaExclusao').show()" icon="ui-icon-trash" title="#{msg['MG21']}" rendered="#{painelUsuario.autorizaFuncionalidade('REMOVER_USUARIO') and painelUsuario.permissaoAdmin(usuario)}">
+		             	<f:setPropertyActionListener value="#{usuario}" target="#{painelUsuario.usuarioSelecionado}" />
+             		</p:commandButton>
 		        </p:column>
 		        
 		    </p:dataTable>
 	    </p:panel>
+	    
+	    <p:dialog header="Alterar Usuário" width="950px" height="287px" responsive="true" widgetVar="alterarUsuario" modal="true" closable="true" showEffect="fade" hideEffect="fade" resizable="true" style="text-align:center !important; border:none !important;">
+	    
+	    	<p:outputPanel autoUpdate="true">
+	    	
+		    	<p:panel id="alterar" style="margin:0 auto; text-align:center;" >
+					
+			        <h:panelGrid columns="2" cellpadding="10" style="margin:0 auto;">
+			        
+		           		<p:outputLabel for="role" value="Role" rendered="#{painelUsuario.autorizaFuncionalidade('ALTERAR_ROLE_USUARIO')}" />
+				
+						<p:selectOneMenu id="role" value="#{alterarUsuario.usuario.role}" rendered="#{painelUsuario.autorizaFuncionalidade('ALTERAR_ROLE_USUARIO')}">
+							
+							<f:selectItem itemLabel="#{msg['MG03']}" noSelectionOption="true"/>
+							<f:selectItems value="#{alterarUsuario.rolesSelectItem}" />
+						</p:selectOneMenu>
+						
+			        </h:panelGrid> 
+			        
+			        <p:panel header="Dados Pessoal" style="margin:0 auto; text-align:center;">
+			        
+			        	<h:panelGrid id="painelCadastroPessoa" columns="4" cellpadding="10" style="margin:0 auto;" >
+			        
+					        <p:outputLabel for="nomePessoa" value="Nome" />
+				           	<p:inputText id="nomePessoa" value="#{alterarUsuario.usuario.pessoa.nome}"/>
+				           	
+				           	<p:outputLabel for="cpf" value="CPF" />
+				           	<p:inputMask mask="999.999.999-99" id="cpf" value="#{alterarUsuario.usuario.pessoa.cpf}"/>
+				           	
+				           	<p:outputLabel for="celular" value="Celular" />
+			            	<p:inputMask mask="(99)-9999-9999" id="celular" value="#{alterarUsuario.usuario.pessoa.celular}"/>
+				           	
+				           	<p:outputLabel for="email" value="E-mail" />
+				           	<p:inputText id="email" label="email" size="40"
+								value="#{alterarUsuario.usuario.pessoa.email}" >
+
+							</p:inputText>
+			           	</h:panelGrid>
+			        </p:panel>
+			        
+			         <h:panelGrid columns="2" cellpadding="10" style="margin:0 auto;">
+		        
+						<p:commandButton id="btnVoltar" value="#{msg['MG01']}" oncomplete="PF('alterarUsuario').hide()" immediate="true" />	
+						<p:commandButton id="btnAlterar" value="Alterar" action="#{alterarUsuario.alterar}" rendered="#{painelUsuario.autorizaFuncionalidade('ALTERAR_USUARIO')}"/>
+						
+			        </h:panelGrid>
+			        
+		    	</p:panel>
+	    	
+	    	</p:outputPanel>
+	    	
+	    </p:dialog>
+	    
+	    <p:dialog header="Renovar senha" width="950px" height="249px" responsive="true" widgetVar="alterarSenha" modal="true" closable="true" showEffect="fade" hideEffect="fade" resizable="true" style="text-align:center !important; border:none !important;">
+	    
+	    	<p:outputPanel autoUpdate="true">
+	    	
+		    	<p:panel id="alterarSenha" style="margin:0 auto; text-align:center;" >
+					
+			        <p:panel header="Dados do Usuário" style="margin:0 auto; text-align:center;">
+			        
+			        
+				       	<h:panelGrid columns="2" cellpadding="10" style="margin:0 auto;">
+		        
+			           		<p:outputLabel for="usuario" value="Usuário:" />
+			           		
+			            	<p:inputText id="usuario" readonly="true" value="#{alterarUsuario.usuario.usuario}" maxlength="45" style="width:250px" />
+							 	
+				 			<p:outputLabel for="senha" value="Senha:" />
+			           		
+			            	<p:password id="senha" value="#{alterarUsuario.usuario.senha}" maxlength="45" style="width:250px"/>
+							 	
+						 	<p:outputLabel for="confirmarSenha" value="Confirmar senha:" />
+			           		
+						 	<p:password id="confirmarSenha" value="#{alterarUsuario.confirmarSenha}" maxlength="45" style="width:250px"/>
+					 		
+				        </h:panelGrid>
+			        </p:panel>
+			        
+			         <h:panelGrid columns="2" cellpadding="10" style="margin:0 auto;">
+		        
+					<p:commandButton id="btnVoltarAlterarSenha" value="#{msg['MG01']}" oncomplete="PF('alterarSenha').hide()" immediate="true" />	
+					<p:commandButton id="btnAlterarSenha" value="Alterar" action="#{alterarUsuario.alterarSenha}" />
+					
+		        </h:panelGrid>
+		    	</p:panel>
+	    	</p:outputPanel>
+	    </p:dialog>
+	    
+	    <p:dialog id="alertaExclusao" header="#{msg['MG22']}" widgetVar="confirmaExclusao" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
+	        <p:outputPanel id="confirmaExclusao" style="text-align:center; border:none !important;">
+	            <h:panelGrid style="border:none !important;">
+	 
+	                <p:row>
+			            <p:column colspan="2">#{msg['MG23']}</p:column>
+			        </p:row>
+			        
+			         <p:row>
+			            <p:column colspan="2"><p:separator></p:separator> </p:column>
+			        </p:row>
+			        
+			        <p:row>
+			        	<p:column>
+				            <p:commandButton oncomplete="PF('confirmaExclusao').hide()" action="#{painelUsuario.excluir()}" value="#{msg['MG21']}" update="@form"></p:commandButton>
+				            <p:commandButton oncomplete="PF('confirmaExclusao').hide()" value="#{msg['MG13']}"></p:commandButton>
+			            </p:column>
+			        </p:row>
+
+	            </h:panelGrid>
+	        </p:outputPanel>
+	    </p:dialog>
 	</ui:define>
 </ui:composition>

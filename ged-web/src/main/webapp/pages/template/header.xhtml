@@ -8,21 +8,29 @@
 		<title><ui:insert name="title"/></title>
 		
 		<h:outputScript library="js" name="primefaces-locale.js"></h:outputScript>
+		<h:outputScript library="js" name="compatibility.js"></h:outputScript>
 		<h:outputStylesheet library="css" name="default.css"></h:outputStylesheet>
 		<h:outputStylesheet library="css" name="primefaces.css"></h:outputStylesheet>
 		
             <style type="text/css">
+            
                    .ui-layout-north {
                           z-index:20 !important;
                          overflow:visible !important;;
                     }
 
-                  .ui-layout-north .ui-layout-unit-content {
+                  	.ui-layout-north .ui-layout-unit-content {
                         overflow:visible !important;
-                   }
+                   	}
                    
                    	.ui-widget, .ui-widget .ui-widget {
 				    	font-size: 11px !important;
+					}
+					.centered {
+						position:relative;
+						height: 100px;
+						margin:0 auto;
+						padding: 10% 0;
 					}
             </style>
 	</h:head>
