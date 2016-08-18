@@ -1,0 +1,177 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:ui="http://java.sun.com/jsf/facelets"
+		      	xmlns:h="http://java.sun.com/jsf/html"
+		      	xmlns:f="http://java.sun.com/jsf/core"
+		      	xmlns:p="http://primefaces.org/ui"
+		      	template="/pages/admin/templatePaginasAdmin.xhtml">
+
+	<ui:define name="title">#{msg['GRUPOUSUARIO1']}</ui:define>
+
+	<ui:define name="body">	 
+	
+		<p:panel style="margin:0 auto; width:80%;">
+		
+			<div class="ui-g" >
+			
+			    <div class="ui-g-6">
+			    	
+			    	<p:panel id="cadastro" header="#{msg['GRUPOUSUARIO1']}"  >
+					
+						<h:panelGrid cellpadding="10" columns="2" >
+						
+							<p:outputLabel  value="#{msg['GRUPOUSUARIO2']}: *" />
+							
+				  			<p:inputText id="nomeGrupo" value="#{cadastroGrupoUsuario.grupoUsuario.grupo}"  >
+				  				<p:ajax partialSubmit="true" process="@this" event="change" global="false"></p:ajax>
+				  			</p:inputText>
+				           	
+				           	<p:outputLabel id="labelNomeUsuario" for="nomeUsuario" value="#{msg['GRUPOUSUARIO3']}: " />
+				           	
+			       			<p:inputText id="nomeUsuario" value="#{cadastroGrupoUsuario.paramPesquisaUsuario}">
+			       				<p:ajax event="keyup" listener="#{cadastroGrupoUsuario.atualizaSelectManyCheckBox}" update="@form" partialSubmit="true"></p:ajax>
+			       			</p:inputText>
+				        </h:panelGrid>
+				        
+				        <p:tooltip id="toolTipNomeUsuario" for="labelNomeUsuario" value="Utilizar para filtrar usuários pelo nome."
+						               showEffect="clip" hideEffect="explode" position="top"/>
+						
+						<p:tooltip id="toolTipNomeUsuario2" for="nomeUsuario" value="Utilizar para filtrar usuários pelo nome."
+						               showEffect="clip" hideEffect="explode" position="top"/>
+						               
+				        <p:scrollPanel id="usuarios" rendered="#{cadastroGrupoUsuario.renderizaManyCheckBox}">
+				        
+				        	<p:selectManyCheckbox id="grid" value="#{cadastroGrupoUsuario.usuariosSelecionados}" layout="grid" columns="3">
+				        		
+				        		<p:ajax partialSubmit="true" process="@this" event="change" global="false"></p:ajax>
+				        		
+						        <f:selectItems value="#{cadastroGrupoUsuario.listSelectItemUsuarios}" />
+						    </p:selectManyCheckbox>
+						    
+				        </p:scrollPanel>	
+			    
+			    	</p:panel>
+			    </div>
+			    
+			    <div class="ui-g-6">
+			    
+			    	<p:panel id="panelFuncionalidade" header="#{msg['GRUPOUSUARIO8']} *" style="margin-bottom:20px" cellpadding="10" >
+			    
+				    	<h:panelGrid cellpadding="10" columns="2">
+				    	
+					    	<p:outputLabel for="funcionalidade" value="#{msg['GRUPOUSUARIO5']}: " />
+				  			<p:selectOneMenu id="funcionalidade" value="#{cadastroGrupoUsuario.funcionalidadeSelecionada}">
+							
+								<p:ajax event="change" update="@form" listener="#{cadastroGrupoUsuario.carregaTipoFuncionalidade}"></p:ajax>
+								
+								<f:selectItem itemLabel="#{msg['MG03']}" noSelectionOption="true"/>
+								<f:selectItems value="#{cadastroGrupoUsuario.filtroGrupoUsuarioDTO.listFuncionalidades}" />
+							</p:selectOneMenu>
+				    	</h:panelGrid>
+			    	
+				    	 <p:panel id="panelPermissoes" header="#{msg['GRUPOUSUARIO6']} *" style="margin-bottom:20px" cellpadding="10" rendered="#{cadastroGrupoUsuario.funcionalidadeSelecionada != null}">
+				    	 
+					    	 <p:selectManyCheckbox  id="manyCheck" value="#{cadastroGrupoUsuario.tipoFuncionalidadesSelecionadas}" layout="responsive" columns="1">
+						        <f:selectItems value="#{cadastroGrupoUsuario.tipoFuncionalidades}" />
+					    	 </p:selectManyCheckbox>
+					    	 
+				    	 </p:panel>
+			    	 
+			    	 	<p:commandButton update="@form" value="#{msg['GRUPOUSUARIO7']}" action="#{cadastroGrupoUsuario.adicionarFuncionalidade}" rendered="#{cadastroGrupoUsuario.funcionalidadeSelecionada != null}"></p:commandButton>
+				    
+				   		<p:separator></p:separator>
+				    
+					    <p:dataTable id="dataTableFuncs" var="func" value="#{cadastroGrupoUsuario.grupoUsuario.funcionalidades}" emptyMessage="#{msg['MG19']}" rendered="#{cadastroGrupoUsuario.mostraDataTableTipoFuncionalidade}">
+					    
+					        <f:facet name="header">
+					           <h:outputText value="#{msg['GRUPOUSUARIO10']}"/>  
+					        </f:facet>
+						  
+					        <p:column headerText="#{msg['GRUPOUSUARIO5']}" width="65%">  
+					            <h:outputText value=" #{func.label}"/>  
+					        </p:column>  
+					        
+					        <p:column width="25%" style="text-align: center;margin:0 auto;">  
+					             <p:commandButton oncomplete="PF('func').show()" action="#{cadastroGrupoUsuario.verificaTipoFuncionalidadeSelecianda(func)}" value="#{msg['GRUPOUSUARIO6']}" update="@form">
+					             </p:commandButton>
+					        </p:column>  
+					        
+					        <p:column width="10%" style="text-align: center;margin:0 auto;">
+					        	<p:commandButton oncomplete="PF('confirmaExclusao').show()" icon="ui-icon-trash" title="#{msg['MG21']}">
+					                <f:setPropertyActionListener value="#{func}" target="#{cadastroGrupoUsuario.funcionalidadeParaExclusao}" />
+					            </p:commandButton>
+					        </p:column>
+					        
+					    </p:dataTable>
+			    	</p:panel>
+			    </div>
+			</div>
+			
+			<div class="ui-g">
+			
+			    <div class="ui-g-12">
+			    
+			    	<h:panelGrid columns="2" style="text-align: center;margin:0 auto;">
+				    	<p:commandButton update="@form" value="#{msg['MG18']}" action="#{cadastroGrupoUsuario.cadastrar}"></p:commandButton>
+				     	<p:commandButton value="#{msg['MG24']}" action="#{cadastroGrupoUsuario.redirecionaPagina('PAINEL_ADMIN')}"></p:commandButton>
+				    </h:panelGrid>
+			    
+			    </div>
+			    
+			</div>
+			
+		</p:panel>
+		
+		
+		 <p:dialog  id="info" header="Funcionalidade: #{cadastroGrupoUsuario.tituloDialogFunc}" widgetVar="func" width="40%" modal="true" showEffect="fade" hideEffect="fade" style="text-align:center; border:none !important;">
+	          
+	          <p:outputPanel autoUpdate="true">
+	          
+	          	<p:dataTable  id="funcDt" var="perm" value="#{cadastroGrupoUsuario.listPermissoes}" emptyMessage="#{msg['MG19']}">
+							        
+			        <p:column headerText="#{msg['GRUPOUSUARIO9']}">
+			            <h:outputText value="#{perm.tipoFuncionalidadeEnum.label}" />
+			        </p:column>
+			        
+			        <p:column headerText="#{msg['MG11']}" style="width:120px;text-align: center;margin:0 auto;">
+			            <h:outputText value="#{perm.situacao.descricao}" />
+			        </p:column>
+			        
+			         <p:column style="width:80px;text-align: center;margin:0 auto;">
+			        	<p:commandButton icon="ui-icon-locked" action="#{cadastroGrupoUsuario.ativarFunc(perm)}"  rendered="#{perm.situacao == 'INATIVO'}" update="funcDt"/>
+			        	<p:commandButton icon="ui-icon-unlocked" action="#{cadastroGrupoUsuario.inativarFunc(perm)}" rendered="#{perm.situacao == 'ATIVO'}" update="funcDt"/>
+			        </p:column>
+				        
+	         	</p:dataTable>
+	          
+	          </p:outputPanel>
+	           
+	          <p:separator></p:separator>
+	           
+	          <p:commandButton oncomplete="PF('func').hide()" value="#{msg['MG24']}"></p:commandButton>
+	    </p:dialog>
+	    
+	    <p:dialog id="alertaExclusao" header="#{msg['MG22']}" widgetVar="confirmaExclusao" modal="true" showEffect="fade" hideEffect="fade" resizable="false" style="text-align:center !important; border:none !important;" >
+	        <p:outputPanel id="confirmaExclusao" style="text-align:center; border:none !important;">
+	            <h:panelGrid style="border:none !important;">
+	 
+	                <p:row>
+			            <p:column colspan="2">#{msg['MG23']}</p:column>
+			        </p:row>
+			        
+			         <p:row>
+			            <p:column colspan="2"><p:separator></p:separator> </p:column>
+			        </p:row>
+			        
+			        <p:row>
+			        	<p:column>
+				            <p:commandButton oncomplete="PF('confirmaExclusao').hide()" action="#{cadastroGrupoUsuario.excluir()}" value="#{msg['MG21']}" update="@form"></p:commandButton>
+				            <p:commandButton oncomplete="PF('confirmaExclusao').hide()" value="#{msg['MG13']}"></p:commandButton>
+			            </p:column>
+			        </p:row>
+	
+	            </h:panelGrid>
+	        </p:outputPanel>
+	    </p:dialog>
+		
+	</ui:define>
+</ui:composition>

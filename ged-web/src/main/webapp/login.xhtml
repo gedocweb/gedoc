@@ -1,0 +1,46 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:ui="http://java.sun.com/jsf/facelets"
+		      	xmlns:h="http://java.sun.com/jsf/html"
+		      	xmlns:f="http://java.sun.com/jsf/core"
+		      	xmlns:p="http://primefaces.org/ui"
+		      	template="/pages/template/templateLogin.xhtml">
+
+	<ui:define name="title">#{msg['LOGIN01']}</ui:define>
+	
+	<ui:define name="body">	 
+	
+		<h:form id="form" prependId="false">
+			<br></br>
+			 <ui:fragment rendered="${!empty param['error']}">
+			 	<p:panel id="mensagem" style="margin:0 auto; width:80%; text-align:center;">
+			 	
+			 		#{msg['MSI137']}
+					
+				</p:panel>
+			</ui:fragment>
+			
+		    <p:panel id="login" header="#{msg['LOGIN01']}" style="margin:0 auto; width:80%; text-align:center;">
+		    
+		        <h:panelGrid columns="3" cellpadding="10" style="margin:0 auto;">
+		        
+	           		<p:outputLabel for="username" value="#{msg['LOGIN02']}:"/> 
+	           		
+	            	<p:inputText id="username" required="true" requiredMessage="#{msg['MSI138']}" maxlength="45" style="width:250px"/>
+					 	
+			 		<h:message for="username" style="color: red;" />	
+			 		
+			 		<p:outputLabel for="password" value="#{msg['LOGIN03']}" />
+			 		
+			 		<p:password id="password" required="true" requiredMessage="#{msg['MSI139']}" maxlength="45" style="width:250px" />
+							
+					<h:message for="password" style="color: red;" />		
+			 			
+		        </h:panelGrid>
+		        
+        		<p:commandButton id="btnLogin"
+					value="#{msg['MG14']}" ajax="false" 
+					action="#{loginController.doLogin()}" />
+		    </p:panel>
+	    </h:form>
+	</ui:define>
+</ui:composition>

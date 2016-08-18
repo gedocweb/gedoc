@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+      
+ 	<head>
+ 	
+	 	<script>
+			//Dinheiro
+			
+		 	function colocaMascaraDinheiro(o, f){
+		
+		 		v_obj = document.getElementById(o.name);
+		 		v_fun = f;
+		 		
+				setTimeout("execmascara()", 1);
+		 	}
+	
+		 	function execmascara(){
+		 		
+		 		v_obj.value = v_fun(v_obj.value);
+		 	}
+	
+		 	function valor(v) {
+	
+				v = v.replace(/\D/g,'');
+				v = v.replace(/(\d{1})(\d{8})$/,"$1.$2");
+				v = v.replace(/(\d{1})(\d{5})$/,"$1.$2");
+				v = v.replace(/(\d{1})(\d{2})$/,"$1,$2");
+	
+				return v;
+			}
+	
+			//Somente Numeros 
+			
+			function somenteNumero(o, f){
+		
+		 		v_obj = document.getElementById(o.name);
+		 		v_fun = f;
+		 		
+				setTimeout("execmascaranumero()", 1);
+		 	}
+	
+		 	function execmascaranumero(){
+		 		
+		 		v_obj.value = v_fun(v_obj.value);
+		 	}
+	
+		 	function numero(v) {
+	
+				v = v.replace(/\D/g, '');
+	
+				return v;
+			}
+		</script>	  
+ 	</head>
+ 	
+ 	<ui:include src="/pages/template/header.xhtml" />
+ 	
+	<h:body>     
+		<f:event listener="#{painelAdmin.renderizaMensagensDaSessao()}" type="preRenderView" />
+	
+		<h:form id="form">
+		 
+			<p:growl id="messages" autoUpdate="true" closable="true" style="margin:0 auto; width:80%; text-align:center;" />
+			
+			 <div id="logout" style="margin:0 auto; width:80%; text-align:left;" >
+			 
+			 	<p:commandButton action="#{painelAdmin.logout()}" icon="ui-icon-power"></p:commandButton>
+			 	<p:separator></p:separator>
+			 	
+			 </div>
+		
+		    <p:panel id="painel" header="#{msg['MENU01']}" style="margin:0 auto; width:80%; text-align:center;" >
+		    
+			    <p:menubar> 
+			    	
+			    	<p:submenu label="#{msg['MENU02']}" >
+			    		<p:menuitem value="#{msg['GRUPOUSUARIO4']}" url="/pages/admin/grupoUsuario/painelGrupoUsuario.jsf" />
+			    	</p:submenu>
+			    	
+			    	<p:submenu label="#{msg['MENU03']}" >
+			    		<p:menuitem value="#{msg['DOC1']}" url="/pages/admin/documento/painelDocumento.jsf" />
+			    	</p:submenu>
+			    </p:menubar>
+		        
+		    </p:panel>
+		    
+		    <ui:insert name="body" />    
+		    
+			<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+			 
+			<p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+			    <p:graphicImage library="imagem" name="loading.gif" />
+			</p:dialog>
+		</h:form>
+	</h:body>
+</html>

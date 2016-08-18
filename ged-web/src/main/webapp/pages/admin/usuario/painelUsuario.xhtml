@@ -1,0 +1,65 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:ui="http://java.sun.com/jsf/facelets"
+		      	xmlns:h="http://java.sun.com/jsf/html"
+		      	xmlns:f="http://java.sun.com/jsf/core"
+		      	xmlns:p="http://primefaces.org/ui"
+		      	ged="/pages/admin/gedPaginasAdmin.xhtml">
+
+	<ui:define name="title">Listagem Usuário</ui:define>
+
+	<ui:define name="body">
+	
+		<p:panel id="pesquisa" header="Listagem Usuário" style="margin:0 auto; width:80%; text-align:center;" >
+		    
+		    <h:panelGrid columns="2" cellpadding="10" style="margin:0 auto;">
+
+				<p:outputLabel for="nome" value="#{msg['MSI106']}" />
+		
+				<p:inputTextarea id="nome"
+					value="#{painelUsuario.filtroUsuarioDTO.usuario}" maxlength="100"
+					style="width:250px" />
+		
+			</h:panelGrid>
+		    
+		    <h:panelGrid columns="3" cellpadding="10" style="margin:0 auto;">
+		
+				<p:commandButton id="btnPesquisar" value="#{msg['MG16']}"
+					action="#{painelUsuario.pesquisar()}" update="@form" />
+				<p:commandButton id="btnLimpar" value="#{msg['MG17']}"
+					action="#{painelUsuario.inicio()}" update="@form" />
+				<p:commandButton id="btnCadastrar" value="#{msg['MG18']}"
+					action="#{painelUsuario.redirecionaPagina('CADASTRAR_USUARIO')}"
+					rendered="#{painelUsuario.autorizaFuncionalidade('CADASTRAR_USUARIO')}" />
+		
+			</h:panelGrid>
+
+			<p:separator style="margin:0 auto; width:80%; text-align:center;"></p:separator>
+			
+      	</p:panel>
+		    
+	    <p:panel id="grid" style="margin:0 auto; width:80%; text-align:center;">
+	    	
+	    	 <p:dataTable id="gridusuario" var="usuario" value="#{painelUsuario.listUsuario}" emptyMessage="#{msg['MG19']}">
+		        
+		        <p:column headerText="#{msg['MSI106']}">
+		            <h:outputText value="#{usuario.pessoa.nome}" rendered="#{usuario.pessoa != null}"/>
+		            <h:outputText value="#{usuario.funcionario.pessoa.nome}" rendered="#{usuario.funcionario != null}"/>
+		        </p:column>
+		        
+		        <p:column headerText="#{msg['MSI108']}">
+		            <h:outputText value="#{usuario.pessoa.cpf}" rendered="#{usuario.pessoa != null}"/>
+		            <h:outputText value="#{usuario.funcionario.pessoa.cpf}" rendered="#{usuario.funcionario != null}"/>
+		        </p:column>
+		        
+		        <p:column headerText="#{msg['MSI165']}">
+		            <h:outputText value="#{usuario.role.label}" />
+		        </p:column>
+		        
+		        <p:column style="width:40px;text-align: center;margin:0 auto;" rendered="#{painelUsuario.autorizaFuncionalidade('ALTERAR_USUARIO')}">
+		             <p:commandButton icon="ui-icon-refresh" title="#{msg['MG20']}" action="#{painelUsuario.redirecionaParaTelaAlterar(usuario)}"/>
+		        </p:column>
+		        
+		    </p:dataTable>
+	    </p:panel>
+	</ui:define>
+</ui:composition>
