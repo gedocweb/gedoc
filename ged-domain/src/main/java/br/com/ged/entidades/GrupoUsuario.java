@@ -2,6 +2,7 @@ package br.com.ged.entidades;
  
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -12,6 +13,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import br.com.ged.domain.FuncionalidadeEnum;
@@ -21,7 +25,7 @@ import br.com.ged.generics.EntidadeBasica;
  
 @Entity
 @Table(name = "tb_grupo_usuario")
-public class GrupoUsuario extends EntidadeBasica{
+public class GrupoUsuario extends EntidadeBasica {
  
 	/**
 	 * 
@@ -30,7 +34,8 @@ public class GrupoUsuario extends EntidadeBasica{
 
 	@Id
 	@Column(name = "id_grupo_usuario")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(generator = "seq_grupo_usuario", strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "seq_grupo_usuario", sequenceName = "seq_grupo_usuario",allocationSize=1)
 	private Long id;
 	
 	@Column(name="grupo")
@@ -52,12 +57,20 @@ public class GrupoUsuario extends EntidadeBasica{
     @Column(name="id_permissao") 
 	private List<TipoFuncionalidadeEnum> tiposFuncionalidades;
 	
-    @ElementCollection(targetClass=Usuario.class)
-    @CollectionTable(
-        name="rl_grupo_usuario",
-        joinColumns=@JoinColumn(name="id_grupo")
-    )
-    @Column(name="id_usuario")	
+	
+//	@OneToMany(mappedBy="grupoUsuario", targetEntity=Usuario.class)
+//	@JoinTable
+//	  (
+//	      name="rl_usuario_grupo_usuario",
+//	      joinColumns={ @JoinColumn(name="id_grupo_usuario", referencedColumnName="id_grupo_usuario") },
+//	      inverseJoinColumns={ @JoinColumn(name="usuario_id", referencedColumnName="id", unique=true) }
+//	)
+	
+	@OneToMany(cascade={CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.DETACH})
+	@JoinTable(name = "rl_grupousuario_usuario", 
+		joinColumns = @JoinColumn(name = "id_grupo_usuario"), 
+		inverseJoinColumns = @JoinColumn(name = "id_usuario")
+	)
     private List<Usuario> usuarios;
 	
 	public GrupoUsuario(){

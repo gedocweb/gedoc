@@ -18,6 +18,10 @@ public class FiltroUsuarioDTO {
 	@EntityProperty("pessoa.nome")
 	private String nomeUsuario;
 	
+	public FiltroUsuarioDTO(){
+		situacao = Situacao.ATIVO;
+	}
+	
 	public String getUsuario() {
 		return usuario;
 	}

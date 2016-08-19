@@ -2,10 +2,10 @@ package br.com.ged.admin.usuario.grupo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.faces.model.SelectItem;
 
 import br.com.ged.domain.FuncionalidadeEnum;
 import br.com.ged.domain.Mensagem;
@@ -18,7 +18,9 @@ import br.com.ged.entidades.Usuario;
 import br.com.ged.excecao.NegocioException;
 import br.com.ged.framework.AbstractManageBean;
 import br.com.ged.framework.GenericServiceController;
+import br.com.ged.service.GrupoUsuarioService;
 import br.com.ged.service.UsuarioService;
+import br.com.ged.util.container.AtributoSessao;
 
 public abstract class GrupoUsuarioSuperController extends AbstractManageBean{
 	
@@ -36,13 +38,14 @@ public abstract class GrupoUsuarioSuperController extends AbstractManageBean{
 	@EJB
 	protected GrupoUsuarioValidadorView validacaoGrupoUsuario;
 	
+	@EJB
+	protected GrupoUsuarioService grupoUsuarioService;
+	
 	protected FiltroGrupoUsuarioDTO filtroGrupoUsuarioDTO;
 	
-	private String paramPesquisaUsuario;
-	
-	private List<SelectItem> listSelectItemUsuarios;
-	private boolean renderizaManyCheckBox;
-	private List<Long> usuariosSelecionados;
+	private List<Usuario> listUsuario;
+	private List<Usuario> listUsuarioSelecionados;
+	private List<Usuario> listUsuarioFiltrados;
 	
 	private List<TipoFuncionalidadeDTO> listPermissoes;
 	private FuncionalidadeEnum funcionalidadeParaExclusao;
@@ -50,40 +53,49 @@ public abstract class GrupoUsuarioSuperController extends AbstractManageBean{
 	
 	@PostConstruct
 	public void inicio(){
-		listSelectItemUsuarios = new ArrayList<>();
-		paramPesquisaUsuario = null;
+		listUsuario = new ArrayList<>();
 		listPermissoes = new ArrayList<>();
-		listSelectItemUsuarios = new ArrayList<>();
-		usuariosSelecionados = new ArrayList<>();
 	}
 	
-	public void atualizaSelectManyCheckBox(){
+	public void atualizaListaUsuariosSemGrupo(){
 		
-		FiltroUsuarioDTO filtroUsuarioDTO = new FiltroUsuarioDTO();
+		List<Usuario> usuarios = serviceUsuario.pesquisar(new FiltroUsuarioDTO());
 		
-		filtroUsuarioDTO.setNomeUsuario(paramPesquisaUsuario);
-		
-		List<Usuario> usuarios = serviceUsuario.pesquisar(filtroUsuarioDTO);
-		
-		listSelectItemUsuarios = montaSelectItemsUsuario(usuarios);
-		
-		renderizaManyCheckBox = !listSelectItemUsuarios.isEmpty();
-		
-		if (!renderizaManyCheckBox){
-			enviaMensagem(Mensagem.GRUPOUSUARIO15);
-		}
+		listUsuario = montaListUsuario(usuarios);
 	}
 	
-	public void excluirFuncionalidade() {
+	public void excluirFuncionalidade(GrupoUsuario grupoUsuario) {
 		
 		if (funcionalidadeParaExclusao == null){
 			return;
 		}
 		
-		getGrupoUsuario().getFuncionalidades().remove(funcionalidadeParaExclusao);
+		if (grupoUsuario.getId() != null && grupoUsuario.getFuncionalidades() != null && grupoUsuario.getFuncionalidades().size() == 1){
+			
+			enviaMensagem(Mensagem.GRUPOUSUARIO18);
+			return;
+		}
 		
-		for (TipoFuncionalidadeEnum tp : funcionalidadeParaExclusao.getFuncionalidades()){
-			getGrupoUsuario().getTiposFuncionalidades().remove(tp);
+		grupoUsuario.getFuncionalidades().remove(funcionalidadeParaExclusao);
+		
+		for (TipoFuncionalidadeEnum tp : funcionalidadeParaExclusao.getPermissoes()){
+			grupoUsuario.getTiposFuncionalidades().remove(tp);
+		}
+		
+		if(grupoUsuario.getId() != null){
+			atualizaGrupoUsuarioLogado(grupoUsuario);
+		}
+		
+		listPermissoes = new ArrayList<>();
+	}
+
+	private void atualizaGrupoUsuarioLogado(GrupoUsuario grupoUsuario) {
+		
+		service.merge(grupoUsuario);
+		
+		if (getGrupoUsuarioLogado().getId().equals(grupoUsuario.getId())){
+			
+			setAtributoSessao(AtributoSessao.GRUPO_USUARIO_LOGADO, grupoUsuario);
 		}
 	}
 	
@@ -102,7 +114,7 @@ public abstract class GrupoUsuarioSuperController extends AbstractManageBean{
 		
 		tituloDialogFunc = funcSelecionada.getLabel();
 		
-		for (TipoFuncionalidadeEnum tpFunc : funcSelecionada.getFuncionalidades()){
+		for (TipoFuncionalidadeEnum tpFunc : funcSelecionada.getPermissoes()){
 			
 			TipoFuncionalidadeDTO tpFuncDTO = new TipoFuncionalidadeDTO();
 			
@@ -121,33 +133,41 @@ public abstract class GrupoUsuarioSuperController extends AbstractManageBean{
 		}
 	}
 	
-	public void ativarFunc(TipoFuncionalidadeDTO func){
+	public void ativarFunc(TipoFuncionalidadeDTO func, GrupoUsuario gpUsuario){
 		
 		for (TipoFuncionalidadeDTO tipoFunc : listPermissoes){
 			
 			if (tipoFunc.getTipoFuncionalidadeEnum().equals(func.getTipoFuncionalidadeEnum())){
 				tipoFunc.setSituacao(Situacao.ATIVO);
 				
-				getGrupoUsuario().getTiposFuncionalidades().add(tipoFunc.getTipoFuncionalidadeEnum());
+				gpUsuario.getTiposFuncionalidades().add(tipoFunc.getTipoFuncionalidadeEnum());
 			}
+		}
+		
+		if (gpUsuario.getId() != null){
+			atualizaGrupoUsuarioLogado(gpUsuario);
 		}
 	}
 	
-	public void inativarFunc(TipoFuncionalidadeDTO func){
+	public void inativarFunc(TipoFuncionalidadeDTO func, GrupoUsuario gpUsuario){
 		
 		for (TipoFuncionalidadeDTO tipoFunc : listPermissoes){
 			
 			if (tipoFunc.getTipoFuncionalidadeEnum().equals(func.getTipoFuncionalidadeEnum())){
 				tipoFunc.setSituacao(Situacao.INATIVO);
 				
-				getGrupoUsuario().getTiposFuncionalidades().remove(tipoFunc.getTipoFuncionalidadeEnum());
+				gpUsuario.getTiposFuncionalidades().remove(tipoFunc.getTipoFuncionalidadeEnum());
 			}
+		}
+		
+		if (gpUsuario.getId() != null){
+			atualizaGrupoUsuarioLogado(gpUsuario);
 		}
 	}
 	
-	private List<SelectItem> montaSelectItemsUsuario(List<Usuario> usuarios) {
+	private List<Usuario> montaListUsuario(List<Usuario> usuarios) {
 		
-		List<SelectItem> list = new ArrayList<>();
+		List<Usuario> list = new ArrayList<>();
 		
 		if (usuarios == null || usuarios.isEmpty()){
 			return list;
@@ -155,12 +175,16 @@ public abstract class GrupoUsuarioSuperController extends AbstractManageBean{
 		
 		for (Usuario usuario : usuarios){
 			
-			SelectItem si = new SelectItem();
-			
-			si.setLabel(usuario.getPessoa().getCpf() +" - "+usuario.getPessoa().getNome());
-			si.setValue(usuario.getId());
-			
-			list.add(si);
+			try{
+				
+				FiltroGrupoUsuarioDTO filtro = new FiltroGrupoUsuarioDTO();
+				filtro.setIdUsuario(usuario.getId());
+				grupoUsuarioService.pesquisar(filtro).iterator().next(); 
+				
+			}catch(NoSuchElementException e){
+				
+				list.add(usuario);
+			}
 		}
 		
 		return list;
@@ -186,34 +210,6 @@ public abstract class GrupoUsuarioSuperController extends AbstractManageBean{
 		this.filtroGrupoUsuarioDTO = filtroGrupoUsuarioDTO;
 	}
 	
-	public String getParamPesquisaUsuario() {
-		return paramPesquisaUsuario;
-	}
-
-	public void setParamPesquisaUsuario(String paramPesquisaUsuario) {
-		this.paramPesquisaUsuario = paramPesquisaUsuario;
-	}
-
-	public List<SelectItem> getListSelectItemUsuarios() {
-		return listSelectItemUsuarios;
-	}
-
-	public boolean isRenderizaManyCheckBox() {
-		return renderizaManyCheckBox;
-	}
-
-	public void setRenderizaManyCheckBox(boolean renderizaManyCheckBox) {
-		this.renderizaManyCheckBox = renderizaManyCheckBox;
-	}
-	
-	public List<Long> getUsuariosSelecionados() {
-		return usuariosSelecionados;
-	}
-
-	public void setUsuariosSelecionados(List<Long> usuariosSelecionados) {
-		this.usuariosSelecionados = usuariosSelecionados;
-	}
-
 	public List<TipoFuncionalidadeDTO> getListPermissoes() {
 		return listPermissoes;
 	}
@@ -236,5 +232,29 @@ public abstract class GrupoUsuarioSuperController extends AbstractManageBean{
 
 	public void setTituloDialogFunc(String tituloDialogFunc) {
 		this.tituloDialogFunc = tituloDialogFunc;
+	}
+
+	public List<Usuario> getListUsuario() {
+		return listUsuario;
+	}
+
+	public void setListUsuario(List<Usuario> listUsuario) {
+		this.listUsuario = listUsuario;
+	}
+
+	public List<Usuario> getListUsuarioSelecionados() {
+		return listUsuarioSelecionados;
+	}
+
+	public void setListUsuarioSelecionados(List<Usuario> listUsuarioSelecionados) {
+		this.listUsuarioSelecionados = listUsuarioSelecionados;
+	}
+
+	public List<Usuario> getListUsuarioFiltrados() {
+		return listUsuarioFiltrados;
+	}
+
+	public void setListUsuarioFiltrados(List<Usuario> listUsuarioFiltrados) {
+		this.listUsuarioFiltrados = listUsuarioFiltrados;
 	}
 }

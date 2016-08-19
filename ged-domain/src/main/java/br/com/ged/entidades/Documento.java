@@ -1,5 +1,6 @@
 package br.com.ged.entidades;
  
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -10,22 +11,25 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import br.com.ged.domain.Situacao;
 import br.com.ged.generics.EntidadeBasica;
  
 @Entity
 @Table(name = "tb_documento")
-public class Documento extends EntidadeBasica{
+public class Documento extends EntidadeBasica {
  
 	private static final long serialVersionUID = 7181106172249020200L;
 
 	@Id
 	@Column(name = "id_documento")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(generator = "seq_documento", strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "seq_documento", sequenceName = "seq_documento",allocationSize=1)
 	private Long id;
 	
 	@Column(name="descricao")
@@ -67,6 +71,40 @@ public class Documento extends EntidadeBasica{
 	
 	public Documento(){
 		situacao = Situacao.ATIVO;
+	}
+	
+	@Transient
+	public String getDataUltimaAlteracaoFormat() {
+		
+		String dataFormat = null;
+		
+		if (this.getDataUltimaAlteracao() != null){
+			
+			dataFormat = formataData(this.getDataUltimaAlteracao(), "dd/MM/yyyy hh:mm:ss");
+		}
+		
+		return dataFormat;
+	}
+	
+	@Transient
+	public String getDataDocumentoFormat() {
+		
+		String dataFormat = null;
+		
+		if (this.getDataDocumento() != null){
+			
+			dataFormat = formataData(this.getDataDocumento(),"dd/MM/yyyy");
+		}
+		
+		return dataFormat;
+	}
+
+	private String formataData(Date date, String pattern) {
+		String dataUltimaAlteracaoFormat;
+		SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+		
+		dataUltimaAlteracaoFormat = dateFormat.format(date);
+		return dataUltimaAlteracaoFormat;
 	}
 
 	public Long getId() {
@@ -155,5 +193,111 @@ public class Documento extends EntidadeBasica{
 
 	public void setObservacao(String observacao) {
 		this.observacao = observacao;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((arquivo == null) ? 0 : arquivo.hashCode());
+		result = prime * result + ((categoria == null) ? 0 : categoria.hashCode());
+		result = prime * result + ((dataDocumento == null) ? 0 : dataDocumento.hashCode());
+		result = prime * result + ((dataInclusao == null) ? 0 : dataInclusao.hashCode());
+		result = prime * result + ((dataUltimaAlteracao == null) ? 0 : dataUltimaAlteracao.hashCode());
+		result = prime * result + ((descricao == null) ? 0 : descricao.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((observacao == null) ? 0 : observacao.hashCode());
+		result = prime * result + ((situacao == null) ? 0 : situacao.hashCode());
+		result = prime * result + ((tipoDocumento == null) ? 0 : tipoDocumento.hashCode());
+		result = prime * result + ((usuario == null) ? 0 : usuario.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Documento)) {
+			return false;
+		}
+		Documento other = (Documento) obj;
+		if (arquivo == null) {
+			if (other.arquivo != null) {
+				return false;
+			}
+		} else if (!arquivo.equals(other.arquivo)) {
+			return false;
+		}
+		if (categoria == null) {
+			if (other.categoria != null) {
+				return false;
+			}
+		} else if (!categoria.equals(other.categoria)) {
+			return false;
+		}
+		if (dataDocumento == null) {
+			if (other.dataDocumento != null) {
+				return false;
+			}
+		} else if (!dataDocumento.equals(other.dataDocumento)) {
+			return false;
+		}
+		if (dataInclusao == null) {
+			if (other.dataInclusao != null) {
+				return false;
+			}
+		} else if (!dataInclusao.equals(other.dataInclusao)) {
+			return false;
+		}
+		if (dataUltimaAlteracao == null) {
+			if (other.dataUltimaAlteracao != null) {
+				return false;
+			}
+		} else if (!dataUltimaAlteracao.equals(other.dataUltimaAlteracao)) {
+			return false;
+		}
+		if (descricao == null) {
+			if (other.descricao != null) {
+				return false;
+			}
+		} else if (!descricao.equals(other.descricao)) {
+			return false;
+		}
+		if (id == null) {
+			if (other.id != null) {
+				return false;
+			}
+		} else if (!id.equals(other.id)) {
+			return false;
+		}
+		if (observacao == null) {
+			if (other.observacao != null) {
+				return false;
+			}
+		} else if (!observacao.equals(other.observacao)) {
+			return false;
+		}
+		if (situacao != other.situacao) {
+			return false;
+		}
+		if (tipoDocumento == null) {
+			if (other.tipoDocumento != null) {
+				return false;
+			}
+		} else if (!tipoDocumento.equals(other.tipoDocumento)) {
+			return false;
+		}
+		if (usuario == null) {
+			if (other.usuario != null) {
+				return false;
+			}
+		} else if (!usuario.equals(other.usuario)) {
+			return false;
+		}
+		return true;
 	}
 }

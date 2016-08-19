@@ -21,8 +21,45 @@ public enum FuncionalidadeEnum {
 	 */
 	MANTER_GRUPO_USUARIO("Manter Grupo de Usuário", 
 			AutorizacaoEnum.ADMINISTRADOR, 
-				TipoFuncionalidadeEnum.CADASTRAR_GRUPO_USUARIO, 
-				TipoFuncionalidadeEnum.PESQUISAR_GRUPO_USUARIO);
+			TipoFuncionalidadeEnum.CADASTRAR_GRUPO_USUARIO, 
+			TipoFuncionalidadeEnum.PESQUISAR_GRUPO_USUARIO,
+			TipoFuncionalidadeEnum.ALTERAR_NOME_GRUPO_USUARIO,
+			TipoFuncionalidadeEnum.EXCLUIR_GRUPO_USUARIO,
+			TipoFuncionalidadeEnum.REMOVER_USUARIO_GU,
+			TipoFuncionalidadeEnum.ALTERAR_PERMISSAO,
+			TipoFuncionalidadeEnum.ALTERAR_FUNCIONALIDADE,
+			TipoFuncionalidadeEnum.INCLUIR_NOVO_USUARIO),
+	
+	
+	MANTER_USUARIO("Manter Usuário", 
+			AutorizacaoEnum.ADMINISTRADOR, 
+			TipoFuncionalidadeEnum.CADASTRAR_USUARIO, 
+			TipoFuncionalidadeEnum.REMOVER_USUARIO,
+			TipoFuncionalidadeEnum.ALTERAR_USUARIO,
+			TipoFuncionalidadeEnum.PESQUISAR_USUARIO,
+			TipoFuncionalidadeEnum.REMOVER_USUARIO_GU,
+			TipoFuncionalidadeEnum.ALTERAR_SENHA_USUARIO,
+			TipoFuncionalidadeEnum.ALTERAR_ROLE_USUARIO),
+	
+	MANTER_CATEGORIA_DOCUMENTO("Manter Categoria Documento",
+			AutorizacaoEnum.ADMINISTRADOR,
+			TipoFuncionalidadeEnum.CADASTRAR_CATEGORIA_DOCUMENTO,
+			TipoFuncionalidadeEnum.ALTERAR_CATEGORIA_DOCUMENTO,
+			TipoFuncionalidadeEnum.REMOVER_CATEGORIA_DOCUMENTO),
+	
+	MANTER_TIPO_DOCUMENTO("Manter Tipo Documento",
+			AutorizacaoEnum.ADMINISTRADOR,
+			TipoFuncionalidadeEnum.CADASTRAR_TIPO_DOCUMENTO,
+			TipoFuncionalidadeEnum.ALTERAR_TIPO_DOCUMENTO,
+			TipoFuncionalidadeEnum.REMOVER_TIPO_DOCUMENTO), 
+	
+	MANTER_DOCUMENTO("Manter Documento",
+			AutorizacaoEnum.ADMINISTRADOR,
+			TipoFuncionalidadeEnum.CADASTRAR_DOCUMENTO,
+			TipoFuncionalidadeEnum.ALTERAR_DOCUMENTO,
+			TipoFuncionalidadeEnum.VISUALIZAR_DOCUMENTO,
+			TipoFuncionalidadeEnum.BAIXAR_DOCUMENTO,
+			TipoFuncionalidadeEnum.REMOVER_DOCUMENTO);
 	
 	private String label;
 
@@ -92,7 +129,7 @@ public enum FuncionalidadeEnum {
 		return list;
 	}
 
-	public static List<String> listTiposPorName(String funcionalidadeSelecionada) {
+	public static List<String> listTipos(String funcionalidadeSelecionada, Role role) {
 		
 		List<String> list = new ArrayList<>();
 		
@@ -102,7 +139,9 @@ public enum FuncionalidadeEnum {
 				
 				for (TipoFuncionalidadeEnum tipoFunc : func.funcionalidades){
 					
-					list.add(tipoFunc.getLabel());
+					if (tipoFunc.getRoles().contains(role)){
+						list.add(tipoFunc.getLabel());
+					}
 				}
 				
 				break;
@@ -112,7 +151,7 @@ public enum FuncionalidadeEnum {
 		return list;
 	}
 
-	public TipoFuncionalidadeEnum[] getFuncionalidades() {
+	public TipoFuncionalidadeEnum[] getPermissoes() {
 		return funcionalidades;
 	}
 }

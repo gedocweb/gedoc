@@ -20,4 +20,8 @@ public interface GrupoUsuarioService {
 	 * @return
 	 */
 	List<GrupoUsuario> pesquisar(FiltroGrupoUsuarioDTO filtro, String... hibernateInitialize);
+
+	List<GrupoUsuario> gruposUsuarioPorNome(String nomeGrupo);
+
+	List<String> listNomeGrupoUsuario();
 }

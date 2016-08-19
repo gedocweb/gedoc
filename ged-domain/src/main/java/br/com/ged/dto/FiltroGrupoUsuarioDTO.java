@@ -13,8 +13,14 @@ public class FiltroGrupoUsuarioDTO {
 	@EntityProperty("grupo")
 	private String grupo;
 	
+	@EntityProperty(value="grupo", ignoraCaseSensitive=true, pesquisaExata=true )
+	private String grupoExato;
+	
 	@EntityProperty("situacao")
 	private Situacao situacao;
+	
+	@EntityProperty("usuarios.id")
+	private Long idUsuario;
 	
 	private List<SelectItem> listFuncionalidades;
 	
@@ -46,5 +52,21 @@ public class FiltroGrupoUsuarioDTO {
 
 	public void setListFuncionalidades(List<SelectItem> listFuncionalidades) {
 		this.listFuncionalidades = listFuncionalidades;
+	}
+
+	public Long getIdUsuario() {
+		return idUsuario;
+	}
+
+	public void setIdUsuario(Long idUsuario) {
+		this.idUsuario = idUsuario;
+	}
+
+	public String getGrupoExato() {
+		return grupoExato;
+	}
+
+	public void setGrupoExato(String grupoExato) {
+		this.grupoExato = grupoExato;
 	}
 }

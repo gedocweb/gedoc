@@ -1,8 +1,13 @@
 package br.com.ged.admin.usuario;
 
-import javax.ejb.EJB;
+import java.util.List;
 
+import javax.ejb.EJB;
+import javax.faces.model.SelectItem;
+
+import br.com.ged.domain.Role;
 import br.com.ged.dto.FiltroUsuarioDTO;
+import br.com.ged.entidades.GrupoUsuario;
 import br.com.ged.entidades.Usuario;
 import br.com.ged.excecao.NegocioException;
 import br.com.ged.framework.AbstractManageBean;
@@ -23,11 +28,14 @@ public abstract class UsuarioSuperController extends AbstractManageBean{
 	
 	protected String confirmarSenha;
 	
-	private boolean usuarioAdmin;
+	@EJB
+	protected GenericServiceController<GrupoUsuario, Long> serviceGrupoUsuario;
+	
+	protected List<SelectItem> listGrupoUsuario;
 	
 	protected void cadastrar() throws NegocioException{
 		
-		validacaoUsuario.confirmaSenha(usuario, getConfirmarSenha());
+		validacaoUsuario.validaCadastro(usuario, getConfirmarSenha());
 		
 		String senhaCriptografada = CriptografiaUtil.criptografar(usuario.getSenha());
 		
@@ -35,6 +43,15 @@ public abstract class UsuarioSuperController extends AbstractManageBean{
 		
 		service.salvar(usuario);
 	}
+	
+	public List<SelectItem> getRolesSelectItem(){
+		
+		if (!getUsuarioLogado().getRole().equals(Role.ADMIN)){
+			return Role.selectItemsGerencia();
+		}
+		
+		return Role.selectItems();
+	}	
 	
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
@@ -55,8 +72,16 @@ public abstract class UsuarioSuperController extends AbstractManageBean{
 	public void setFiltroUsuarioDTO(FiltroUsuarioDTO filtroUsuarioDTO) {
 		this.filtroUsuarioDTO = filtroUsuarioDTO;
 	}
+
+	public Usuario getUsuario() {
+		return usuario;
+	}
 	
-	public boolean getUsuarioAdmin() {
-		return usuarioAdmin;
+	public List<SelectItem> getListGrupoUsuario() {
+		return listGrupoUsuario;
+	}
+
+	public void setListGrupoUsuario(List<SelectItem> listGrupoUsuario) {
+		this.listGrupoUsuario = listGrupoUsuario;
 	}
 }

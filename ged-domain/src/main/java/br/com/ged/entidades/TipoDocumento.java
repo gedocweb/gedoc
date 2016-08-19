@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import br.com.ged.domain.Situacao;
@@ -12,7 +13,7 @@ import br.com.ged.generics.EntidadeBasica;
  
 @Entity
 @Table(name = "tb_tipo_doc")
-public class TipoDocumento extends EntidadeBasica{
+public class TipoDocumento extends EntidadeBasica implements Comparable<TipoDocumento>{
  
 	/**
 	 * 
@@ -21,7 +22,8 @@ public class TipoDocumento extends EntidadeBasica{
 
 	@Id
 	@Column(name = "id_tipo_doc")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(generator = "seq_tipo_doc", strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "seq_tipo_doc", sequenceName = "seq_tipo_doc",allocationSize=1)
 	private Long id;
 	
 	@Column(name="descricao")
@@ -56,5 +58,10 @@ public class TipoDocumento extends EntidadeBasica{
 
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
+	}
+
+	@Override
+	public int compareTo(TipoDocumento o) {
+		return this.getDescricao().toLowerCase().compareTo(o.getDescricao().toLowerCase());
 	}
 }

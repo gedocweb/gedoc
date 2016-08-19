@@ -1,6 +1,5 @@
 package br.com.ged.admin.usuario;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -8,13 +7,12 @@ import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
+import br.com.ged.domain.Mensagem;
 import br.com.ged.domain.Pagina;
 import br.com.ged.domain.Situacao;
 import br.com.ged.dto.FiltroUsuarioDTO;
 import br.com.ged.entidades.Usuario;
-import br.com.ged.excecao.NegocioException;
 import br.com.ged.service.UsuarioService;
-import br.com.ged.util.container.AtributoSessao;
 
 @ManagedBean(name="painelUsuario")
 @ViewScoped
@@ -26,7 +24,7 @@ public class UsuarioPainelController extends UsuarioSuperController{
 	@EJB
 	private UsuarioService usuarioService;
 	
-	@PostConstruct
+	@PostConstruct	
 	public void inicio(){
 		
 		filtroUsuarioDTO = new FiltroUsuarioDTO();
@@ -35,18 +33,13 @@ public class UsuarioPainelController extends UsuarioSuperController{
 	public void pesquisar(){
 		
 		listUsuario = usuarioService.pesquisar(filtroUsuarioDTO);
-	}
-	
-	public void redirecionaParaTelaAlterar(Usuario usuario) throws IOException, NegocioException{
-		
-		setAtributoSessao(AtributoSessao.OBJ_ALTERAR_USUARIO, usuario);
-		
-		redirecionaPagina(Pagina.ALTERAR_USUARIO);
-	}
+	}           
 	
 	public void excluir(){
-		service.excluir(usuarioSelecionado);
+		
+		usuarioService.excluir(usuarioSelecionado.getId());
 		this.pesquisar();
+		enviaMensagem(Mensagem.MDF001);
 	}
 	
 	public void ativarUsuario(Usuario usuario){

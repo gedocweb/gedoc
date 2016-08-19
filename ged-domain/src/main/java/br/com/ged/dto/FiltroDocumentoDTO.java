@@ -1,6 +1,7 @@
 package br.com.ged.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 import br.com.ged.anotations.EntityProperty;
 import br.com.ged.generics.DataFiltroBetween;
@@ -22,9 +23,6 @@ public class FiltroDocumentoDTO implements Serializable{
 	@EntityProperty(value="dataUltimaAlteracao")
 	private DataFiltroBetween dataUltimaALteracao;
 	
-	@EntityProperty(value="categoria.id")
-	private Long idCategoria;
-	
 	@EntityProperty(value="tipoDocumento.id")
 	private Long idTipoDocumento;
 	
@@ -33,6 +31,9 @@ public class FiltroDocumentoDTO implements Serializable{
 	
 	@EntityProperty(value="observacao")
 	private String observacao;
+	
+	@EntityProperty(value="categoria.id", listIds=true)
+	private List<Long> subCategorias;
 	
 	public FiltroDocumentoDTO(){
 		dataInclusaoDocumento = new DataFiltroBetween();
@@ -64,14 +65,6 @@ public class FiltroDocumentoDTO implements Serializable{
 		this.dataUltimaALteracao = dataUltimaALteracao;
 	}
 
-	public Long getIdCategoria() {
-		return idCategoria;
-	}
-
-	public void setIdCategoria(Long idCategoria) {
-		this.idCategoria = idCategoria;
-	}
-
 	public Long getIdTipoDocumento() {
 		return idTipoDocumento;
 	}
@@ -94,5 +87,13 @@ public class FiltroDocumentoDTO implements Serializable{
 
 	public void setObservacao(String observacao) {
 		this.observacao = observacao;
+	}
+
+	public List<Long> getSubCategorias() {
+		return subCategorias;
+	}
+
+	public void setSubCategorias(List<Long> subCategorias) {
+		this.subCategorias = subCategorias;
 	}
 }

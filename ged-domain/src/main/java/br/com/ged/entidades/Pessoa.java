@@ -7,6 +7,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import br.com.ged.domain.Situacao;
@@ -23,7 +24,8 @@ public class Pessoa extends EntidadeBasica{
 
 	@Id
 	@Column(name = "id_pessoa")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(generator = "seq_pessoa", strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "seq_pessoa", sequenceName = "seq_pessoa",allocationSize=1)
 	private Long id;
 	
 	@Column(name="nome")
@@ -35,6 +37,12 @@ public class Pessoa extends EntidadeBasica{
 	
 	@Column(name="cpf")
 	private String cpf;
+	
+	@Column(name="celular")
+	private String celular;
+	
+	@Column(name="email")
+	private String email;
 	
 	public Pessoa(){
 		situacao = Situacao.ATIVO;
@@ -70,5 +78,21 @@ public class Pessoa extends EntidadeBasica{
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getCelular() {
+		return celular;
+	}
+
+	public void setCelular(String celular) {
+		this.celular = celular;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }

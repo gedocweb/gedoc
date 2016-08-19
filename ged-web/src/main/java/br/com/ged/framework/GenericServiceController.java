@@ -149,6 +149,10 @@ public class GenericServiceController<T extends EntidadeBasica, ID extends Seria
 	public List<T> listarTodos(Class<T> clazz) {
 		return genericService.listarTodos(clazz);
 	}
+	
+	public List<T> listarTodos(Class<T> clazz, String...camposInitialize) {
+		return genericService.listarTodos(clazz,camposInitialize);
+	}
 
 	/**
 	 * <p>Remove entidade no banco de dados e envia mensagem a tela do usuário automaticamente a partir do interceptor.</p>
@@ -176,5 +180,17 @@ public class GenericServiceController<T extends EntidadeBasica, ID extends Seria
 	@Interceptors(InterceptionDefaultMenssage.class)
 	public T merge(T t) {
 		return genericService.merge(t);
+	}
+	
+	public T mergeSemMensagem(T t) {
+		return genericService.merge(t);
+	}
+
+	public boolean emptyTable(Class<T> t) {
+		return genericService.emptyTable(t);
+	}
+
+	public boolean singleLine(Class<T> class1) {
+		return genericService.singleLine(class1);
 	}
 }

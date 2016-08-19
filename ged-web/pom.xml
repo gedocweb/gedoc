@@ -127,6 +127,12 @@
 		    <artifactId>primefaces-extensions</artifactId>
 		    <version>6.0.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.primefaces.themes</groupId>
+			<artifactId>all-themes</artifactId>
+			<version>1.0.10</version>
+		</dependency>
 		
 		<dependency>
 	      <groupId>commons-fileupload</groupId>
@@ -169,6 +175,13 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        
+        <!-- Dependências de conversão de word para pdf -->
+        <dependency>
+		    <groupId>fr.opensagres.xdocreport</groupId>
+		    <artifactId>org.apache.poi.xwpf.converter.pdf</artifactId>
+		    <version>1.0.6</version>
+		</dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>

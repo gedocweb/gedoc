@@ -4,18 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import javax.faces.model.SelectItem;
 
+import org.apache.commons.lang3.StringUtils;
+import org.primefaces.event.CellEditEvent;
+
+import br.com.ged.domain.FuncionalidadeEnum;
 import br.com.ged.domain.Mensagem;
 import br.com.ged.domain.Pagina;
 import br.com.ged.domain.Situacao;
 import br.com.ged.dto.FiltroGrupoUsuarioDTO;
 import br.com.ged.entidades.GrupoUsuario;
 import br.com.ged.entidades.Usuario;
-import br.com.ged.service.GrupoUsuarioService;
+import br.com.ged.excecao.NegocioException;
 
 @ManagedBean(name="painelGrupoUsuario")
 @ViewScoped
@@ -24,10 +26,12 @@ public class GrupoUsuarioPainelController extends GrupoUsuarioSuperController{
 	private List<GrupoUsuario> listGrupoUsuario;
 	private GrupoUsuario grupoUsuarioSelecionado;
 	
-	@EJB
-	private GrupoUsuarioService grupoUsuarioService;
-	
 	private Usuario usuarioSelecionado;
+	
+	private FuncionalidadeEnum funcionalidadeSelecionadaParaAdicionar;
+	
+	private String nomeGrupoAntigo;
+	private String nomeGrupoNovo;
 	
 	@PostConstruct
 	public void inicio(){
@@ -52,66 +56,94 @@ public class GrupoUsuarioPainelController extends GrupoUsuarioSuperController{
 		}
 	}
 	
-	public void atualizaSelectManyCheckBox(){
+	public void alterarNomeGrupo(){
 		
-		super.atualizaSelectManyCheckBox();
-		
-		List<SelectItem> listSelectItem = getListSelectItemUsuarios();
-		
-		if (listSelectItem != null && !listSelectItem.isEmpty()){
+		try {
 			
-			if (getGrupoUsuarioSelecionado().getUsuarios() != null && !getGrupoUsuarioSelecionado().getUsuarios().isEmpty()){
-				
-				if (getUsuariosSelecionados() == null){
-					setUsuariosSelecionados(new ArrayList<Long>());
-				}
-				
-				for (Usuario usuario : getGrupoUsuarioSelecionado().getUsuarios()){
-					
-					getUsuariosSelecionados().add(usuario.getId());
-				}
+			List<GrupoUsuario> list = grupoUsuarioService.gruposUsuarioPorNome(nomeGrupoAntigo);
+			
+			if (list == null || list.isEmpty()){
+				return;
 			}
+			
+			GrupoUsuario gu = list.iterator().next();
+			
+			gu.setGrupo(nomeGrupoNovo);
+			
+			validacaoGrupoUsuario.validaNomeDuplicado(gu);
+			
+			service.merge(gu);
+			
+		} catch (NegocioException e) {
+			e.printStackTrace();
 		}
+	}
+	
+	public void onCellEdit(CellEditEvent event) {
+		
+		Object oldValue = event.getOldValue();
+        Object newValue = event.getNewValue();
+        
+        if (newValue != null && StringUtils.isNotBlank(newValue.toString())){
+        	
+        	this.nomeGrupoAntigo = oldValue.toString();
+        	this.nomeGrupoNovo = newValue.toString();
+        	
+        	abrirModal("confirmaAlterarNomeGrupoDG");
+        }
+    }
+	
+	public void limpaPermissoes(){
+		setListPermissoes(new ArrayList<TipoFuncionalidadeDTO>());
+	}
+	
+	public void adicionarNovaFuncionalidade(){
+		
+		if (funcionalidadeSelecionadaParaAdicionar == null){
+			enviaMensagem(Mensagem.GRUPOUSUARIO17);
+			return;
+		}
+		
+		getGrupoUsuarioSelecionado().getFuncionalidades().add(funcionalidadeSelecionadaParaAdicionar);
+		service.merge(getGrupoUsuarioSelecionado());
 	}
 	
 	public void adicionaNovosUsuarios(){
 		
-		for (Long idUsuario : getUsuariosSelecionados()){
-			
-			Usuario usuario = serviceGenericUsuario.getById(Usuario.class, idUsuario);
-			getGrupoUsuarioSelecionado().getUsuarios().add(usuario);
-		}
+		getGrupoUsuarioSelecionado().getUsuarios().addAll(getListUsuarioSelecionados());
 	}
 	
 	public void atualizaUsuarios(){
 		
 		service.merge(getGrupoUsuarioSelecionado());
-		enviaMensagem(Mensagem.MDF001);
 	}
 	
 	public void excluir(){
-		service.excluir(grupoUsuarioSelecionado);
-		this.pesquisar();
+		
+		if (!service.singleLine(GrupoUsuario.class)){
+			
+			service.excluir(grupoUsuarioSelecionado);
+			this.pesquisar();
+		}else{
+			enviaMensagem(Mensagem.GRUPOUSUARIO20);
+		}
 	}
 	
 	public void excluirUsuario(){
 		
 		getGrupoUsuarioSelecionado().getUsuarios().remove(usuarioSelecionado);
 		service.merge(getGrupoUsuarioSelecionado());
-		enviaMensagem(Mensagem.MDF001);
 	}
 	
 	public void ativarGrupoUsuario(GrupoUsuario grupoUsuario){
 		
 		grupoUsuario.setSituacao(Situacao.ATIVO);
-		
 		service.salvar(grupoUsuario);
 	}
 	
 	public void inativarGrupoUsuario(GrupoUsuario grupoUsuario){
 		
 		grupoUsuario.setSituacao(Situacao.INATIVO);
-		
 		service.salvar(grupoUsuario);
 	}
 	
@@ -138,5 +170,29 @@ public class GrupoUsuarioPainelController extends GrupoUsuarioSuperController{
 
 	public void setUsuarioSelecionado(Usuario usuarioSelecionado) {
 		this.usuarioSelecionado = usuarioSelecionado;
+	}
+
+	public FuncionalidadeEnum getFuncionalidadeSelecionadaParaAdicionar() {
+		return funcionalidadeSelecionadaParaAdicionar;
+	}
+
+	public void setFuncionalidadeSelecionadaParaAdicionar(FuncionalidadeEnum funcionalidadeSelecionadaParaAdicionar) {
+		this.funcionalidadeSelecionadaParaAdicionar = funcionalidadeSelecionadaParaAdicionar;
+	}
+
+	public String getNomeGrupoAntigo() {
+		return nomeGrupoAntigo;
+	}
+
+	public void setNomeGrupoAntigo(String nomeGrupoAntigo) {
+		this.nomeGrupoAntigo = nomeGrupoAntigo;
+	}
+
+	public String getNomeGrupoNovo() {
+		return nomeGrupoNovo;
+	}
+
+	public void setNomeGrupoNovo(String nomeGrupoNovo) {
+		this.nomeGrupoNovo = nomeGrupoNovo;
 	}
 }

@@ -30,7 +30,9 @@ public enum AutorizacaoEnum {
 	 */
 	ADMINISTRADOR(Role.ADMIN, Pagina.TODAS),
 							  
-	GERENTE(Role.GERENTE, Pagina.TODAS);
+	GERENTE(Role.GERENTE, Pagina.TODAS),
+	
+	COLABORADOR(Role.COLABORADOR, Pagina.TODAS);
 	
 	private Pagina[] paginasComPermissao;
 	private Role role;
@@ -121,7 +123,7 @@ public enum AutorizacaoEnum {
 		return permissaoAnonima;
 	}
 	
-	private static List<String> rolesDisponiveisParaPagina(Pagina pagina){
+	public static List<String> rolesDisponiveisParaPagina(Pagina pagina){
 		
 		List<String> autorizacaoDisponivel = new ArrayList<String>();
 		

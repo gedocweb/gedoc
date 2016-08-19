@@ -15,11 +15,17 @@ public interface GenericService<T extends EntidadeBasica, ID extends Serializabl
 	T getById(Class<T> clazz, ID id);
 	
 	List<T> listarTodos(Class<T> clazz);
+	
+	List<T> listarTodos(Class<T> clazz, String... camposInitialize);
 
 	T getById(Class<T> clazz, ID id, String... camposInitialize);
 
 	void excluir(T id);
 	
 	T merge(T id);
+
+	boolean emptyTable(Class<T> t);
+
+	boolean singleLine(Class<T> class1);
 
 }

@@ -1,7 +1,9 @@
 package br.com.ged.framework;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -20,11 +22,16 @@ import br.com.ged.domain.AutorizacaoEnum;
 import br.com.ged.domain.FuncionalidadeEnum;
 import br.com.ged.domain.Mensagem;
 import br.com.ged.domain.Pagina;
+import br.com.ged.domain.Role;
+import br.com.ged.domain.Situacao;
 import br.com.ged.domain.TipoFuncionalidadeEnum;
 import br.com.ged.domain.TipoMensagem;
 import br.com.ged.domain.relatorio.RelatorioEnum;
+import br.com.ged.dto.FiltroGrupoUsuarioDTO;
+import br.com.ged.entidades.GrupoUsuario;
 import br.com.ged.entidades.Usuario;
 import br.com.ged.excecao.NegocioException;
+import br.com.ged.service.GrupoUsuarioService;
 import br.com.ged.service.UsuarioService;
 import br.com.ged.util.InitMessageProperties;
 import br.com.ged.util.container.AtributoSessao;
@@ -44,20 +51,45 @@ import br.com.ged.util.relatorio.RelatorioUtil;
  */
 public abstract class AbstractManageBean extends AutorizacaoManageBean {
 	
-	protected static final String FORM_PRIMEFACES = "@form";
+	protected static final String FORM = "form";
 	
 	private AutorizacaoEnum autorizacao;
 	protected boolean paraThread;
 	
 	@EJB
+	private GenericServiceController<GrupoUsuario, Long> service;
+	
+	@EJB
 	protected UsuarioService usuarioService;
 	
+	@EJB
+	private GrupoUsuarioService grupoUsuarioService;
+	
 	private Usuario usuarioLogado;
+	private GrupoUsuario grupoUsuarioLogado;
+	private Authentication authentication;
+	
+	private boolean administrador;
 	
 	@Override
 	public boolean autorizaFuncionalidade(TipoFuncionalidadeEnum tipoFuncionalidade){
 		
-		return FuncionalidadeEnum.verificaAutorizacaoComAcessoNaFuncionalidade(autorizacao, tipoFuncionalidade);
+		if (grupoUsuarioLogado == null){
+			
+			if (usuarioLogado != null && !AutorizacaoEnum.rolesDisponiveisParaPagina(getPaginaManageBean()).contains(usuarioLogado.getRole().name())){
+				
+				try {
+					redirecionaPagina(Pagina.PAINEL_ADMIN);
+					enviaMensagem(Mensagem.AUTH01);
+				} catch (NegocioException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			return false;
+		}
+		
+		return grupoUsuarioLogado.getTiposFuncionalidades().contains(tipoFuncionalidade);
 	}
 	
 	@PostConstruct
@@ -65,7 +97,7 @@ public abstract class AbstractManageBean extends AutorizacaoManageBean {
 	public void validaPermissionamento() throws IOException, NegocioException {
 		
 		try{
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			authentication = SecurityContextHolder.getContext().getAuthentication();
 	    	autorizacao = AutorizacaoEnum.usuarioComAcesso(getPaginaManageBean(), permissoesUsuarioLogado());
 	    	
 	    	if (autorizacao == null || !authentication.isAuthenticated()) {
@@ -75,6 +107,45 @@ public abstract class AbstractManageBean extends AutorizacaoManageBean {
 	        }else{
 	        	
 	        	usuarioLogado = usuario();
+	        	
+	        	if (usuarioLogado == null){
+	        		return;
+	        	}
+	        	
+	        	if (getAtributoSessao(AtributoSessao.GRUPO_USUARIO_LOGADO) == null){
+	        		
+	        		try{
+	        			
+	        			FiltroGrupoUsuarioDTO filtroGrupo = new FiltroGrupoUsuarioDTO();
+			        	filtroGrupo.setIdUsuario(usuarioLogado.getId());
+			        	grupoUsuarioLogado = grupoUsuarioService.pesquisar(filtroGrupo,"tiposFuncionalidades").iterator().next();
+			        	
+			        	setAtributoSessao(AtributoSessao.GRUPO_USUARIO_LOGADO, grupoUsuarioLogado);
+	        			
+	        		}catch(NoSuchElementException ns){
+	        			
+	        			ns.printStackTrace();
+	        			
+        				if (AutorizacaoEnum.ADMINISTRADOR.equals(autorizacao)){
+        					
+        					GrupoUsuario grupoUsuarioAdmin = new GrupoUsuario();
+        					grupoUsuarioAdmin.setFuncionalidades(Arrays.asList(FuncionalidadeEnum.MANTER_GRUPO_USUARIO, FuncionalidadeEnum.MANTER_USUARIO));
+        					
+        					grupoUsuarioAdmin.setTiposFuncionalidades(TipoFuncionalidadeEnum.permissoesPorFuncionalidades(FuncionalidadeEnum.MANTER_GRUPO_USUARIO, FuncionalidadeEnum.MANTER_USUARIO));
+        					
+        					grupoUsuarioAdmin.setSituacao(Situacao.ATIVO);
+        					grupoUsuarioAdmin.setGrupo("Grupo Suporte Admin - "+usuarioLogado.getPessoa().getNome());
+        					grupoUsuarioAdmin.setUsuarios(Arrays.asList(usuarioLogado));
+        					
+        					service.salvarSemMensagem(grupoUsuarioAdmin);
+        					
+        					setAtributoSessao(AtributoSessao.GRUPO_USUARIO_LOGADO, grupoUsuarioAdmin);
+        				}
+	        		}
+	        	
+	        	}else{
+	        		grupoUsuarioLogado = (GrupoUsuario) getAtributoSessao(AtributoSessao.GRUPO_USUARIO_LOGADO);
+	        	}
 	        }
 	    	
 		}catch (Exception ex){
@@ -82,19 +153,51 @@ public abstract class AbstractManageBean extends AutorizacaoManageBean {
 			ex.printStackTrace();
 			logout();
 		}
-    	
 	}
 	
 	public Usuario usuario(){
 		
-		Object username = getAtributoSessao(AtributoSessao.USUARIO);
 		Usuario usuario = null;
+		String username = null;
 		
-		if (username != null){
-			usuario = usuarioService.usuarioPorUsername(username.toString());
+		if (loginUsuarioPorParametroRequest() != null && loginUsuarioPorParametroRequest().length > 0){
+			username = loginUsuarioPorParametroRequest()[0];
 		}
 		
+		if (username == null){
+			
+			username = getAtributoSessao(AtributoSessao.USUARIO).toString();
+		}
+		
+		if (username != null && getAtributoSessao(AtributoSessao.USUARIO_LOGADO) == null){
+			usuario = usuarioService.usuarioPorUsername(username.toString());
+			setAtributoSessao(AtributoSessao.USUARIO_LOGADO, usuario);
+		}else{
+			usuario = (Usuario) getAtributoSessao(AtributoSessao.USUARIO_LOGADO);
+		}
+		
+		administrador = usuario.getRole().equals(Role.ADMIN);
+		
 		return usuario;
+	}
+	
+	public boolean permissaoAdmin(Usuario usuario){
+		
+		if (usuario == null){
+			return false;
+		}
+		
+		if (isAdministrador()){
+			 return true;
+		}else if (usuario.getRole().equals(Role.ADMIN) && !isAdministrador()){
+			return false;
+		}
+		
+		return true;
+	}
+
+	private String[] loginUsuarioPorParametroRequest() {
+		return getHttpRequest().getParameterValues("username");
 	}
 	
 	/**
@@ -138,10 +241,20 @@ public abstract class AbstractManageBean extends AutorizacaoManageBean {
 	public void logout() throws NegocioException {
 		
 		paraThread = Boolean.TRUE;
+		usuarioLogado = null;
+		grupoUsuarioLogado = null;
+		removeTodosAtributosSessao();
 		redirecionaPagina(Pagina.LOGIN);
 		getHttpSession().invalidate();
 	}
 	
+	private void removeTodosAtributosSessao() {
+		
+		for (AtributoSessao attr : AtributoSessao.values()){
+			limparAtributoDaSessao(attr);
+		}
+	}
+
 	@Override
 	protected HttpSession getHttpSession(){
 		return getHttpRequest().getSession(Boolean.TRUE);
@@ -299,6 +412,14 @@ public abstract class AbstractManageBean extends AutorizacaoManageBean {
 		
 		contextPrimefaces().execute("PF('"+varModal+"').hide()");
 	}
+	
+	public void updateComponente(String idComponente){
+		contextPrimefaces().update(idComponente);
+	}
+	
+	public void updateForm(){
+		contextPrimefaces().update(FORM);
+	}
 
 	protected AutorizacaoEnum getAutorizacao() {
 		return autorizacao;
@@ -306,5 +427,13 @@ public abstract class AbstractManageBean extends AutorizacaoManageBean {
 
 	public Usuario getUsuarioLogado() {
 		return usuarioLogado;
+	}
+
+	public boolean isAdministrador() {
+		return administrador;
+	}
+
+	public GrupoUsuario getGrupoUsuarioLogado() {
+		return grupoUsuarioLogado;
 	}
 }

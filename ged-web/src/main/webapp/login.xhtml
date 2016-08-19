@@ -10,18 +10,24 @@
 	<ui:define name="body">	 
 	
 		<h:form id="form" prependId="false">
+			
+			<br/>
+			<br/>
+			
+			<p:graphicImage style="padding-left: 46%;" library="imagem" name="Logo.png" width="150px" height="200px" />
+			
 			<br></br>
 			 <ui:fragment rendered="${!empty param['error']}">
-			 	<p:panel id="mensagem" style="margin:0 auto; width:80%; text-align:center;">
+			 	<p:panel id="mensagem" style="margin:0 auto; width:40%; height:50%; text-align:center;">
 			 	
-			 		#{msg['MSI137']}
+			 		Usuário ou senha incorretos!
 					
 				</p:panel>
 			</ui:fragment>
 			
-		    <p:panel id="login" header="#{msg['LOGIN01']}" style="margin:0 auto; width:80%; text-align:center;">
+		    <p:panel id="login" header="#{msg['LOGIN01']}" style="margin:0 auto; width:40%; height:50%; text-align:center;">
 		    
-		        <h:panelGrid columns="3" cellpadding="10" style="margin:0 auto;">
+		        <h:panelGrid columns="3"  cellpadding="10" style="margin:0 auto;">
 		        
 	           		<p:outputLabel for="username" value="#{msg['LOGIN02']}:"/> 
 	           		
@@ -41,6 +47,8 @@
 					value="#{msg['MG14']}" ajax="false" 
 					action="#{loginController.doLogin()}" />
 		    </p:panel>
+		    
+		    
 	    </h:form>
 	</ui:define>
 </ui:composition>

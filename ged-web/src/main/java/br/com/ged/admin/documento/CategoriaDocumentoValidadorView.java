@@ -28,6 +28,10 @@ public class CategoriaDocumentoValidadorView extends AbstractValidacao{
 		if (categoria == null || StringUtils.isBlank(categoria.getDescricao())){
 			throw new NegocioException(Mensagem.CATDOC1);
 		}
+		
+		if (listVazia(categoria.getListGrupoUsuario())){
+			throw new NegocioException(Mensagem.CATDOC4);
+		}
 	}
 	
 	public void validaCadastro(Categoria categoria) throws NegocioException{

@@ -68,4 +68,6 @@ public @interface EntityProperty {
 	public abstract boolean pesquisaExata() default false;
 	
 	public abstract boolean ignoraCaseSensitive() default false;
+	
+	public abstract boolean listIds() default false;
 }

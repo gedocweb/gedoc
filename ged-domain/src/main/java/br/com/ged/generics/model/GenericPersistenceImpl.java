@@ -6,6 +6,7 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 
+import org.hibernate.Criteria;
 import org.hibernate.LockOptions;
 
 import br.com.ged.generics.ConsultasDaoJpa;
@@ -13,7 +14,7 @@ import br.com.ged.generics.EntidadeBasica;
 import br.com.ged.model.AbstractModel;
 
 @Stateless
-public class GenericPersistenceImpl<T extends EntidadeBasica, ID extends Serializable>
+public class GenericPersistenceImpl<T extends EntidadeBasica, ID extends Serializable> 
 					extends AbstractModel implements GenericPersistence<T, ID> {
 	
 	@EJB
@@ -53,7 +54,7 @@ public class GenericPersistenceImpl<T extends EntidadeBasica, ID extends Seriali
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> listarTodos(Class<T> clazz, String...camposInitialize) {
-		return (List<T>) consultaReposiroty.inicializaCampo(camposInitialize, consultaReposiroty.getSession().createCriteria(clazz).list());
+		return (List<T>) consultaReposiroty.inicializaCampos(consultaReposiroty.getSession().createCriteria(clazz).list(),camposInitialize);
 	}
 
 	@Override
@@ -64,5 +65,45 @@ public class GenericPersistenceImpl<T extends EntidadeBasica, ID extends Seriali
 	@Override
 	public T merge(T t) {
 		return em.merge(t);
+	}
+
+	@Override
+	public boolean emptyTable(Class<T> clazz) {
+		
+		Criteria criteria = consultaReposiroty.getSession().createCriteria(clazz);
+		
+		criteria.setMaxResults(1);
+		
+		boolean tabelaSemRegistro = true;
+		
+		try{
+			
+			tabelaSemRegistro = criteria.list().size() == 0;
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		
+		return tabelaSemRegistro;
+	}
+
+	@Override
+	public boolean singleLine(Class<T> clazz) {
+		
+		Criteria criteria = consultaReposiroty.getSession().createCriteria(clazz);
+		
+		criteria.setMaxResults(2);
+		
+		boolean tabelaComUmUnico = true;
+		
+		try{
+			
+			tabelaComUmUnico = criteria.list().size() == 1;
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		
+		return tabelaComUmUnico;
 	}
 }

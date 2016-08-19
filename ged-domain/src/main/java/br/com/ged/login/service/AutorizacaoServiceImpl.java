@@ -31,7 +31,7 @@ public class AutorizacaoServiceImpl implements UserDetailsService {
 		
 		filtro.setUsuario(username);
 	
-		final Usuario ususario = consultaDao.primeiroRegistroPorFiltro(filtro, Usuario.class,"grupoUsuario");
+		final Usuario ususario = consultaDao.primeiroRegistroPorFiltro(filtro, Usuario.class);
 		
 		if (ususario == null){
 			throw new UsernameNotFoundException(Mensagem.MNG003.name());

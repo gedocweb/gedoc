@@ -1,5 +1,6 @@
 package br.com.ged.generics;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -19,6 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.ProjectionList;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.proxy.pojo.javassist.JavassistLazyInitializer;
 import org.hibernate.sql.JoinType;
@@ -93,7 +96,21 @@ public class ConsultasDaoJpa<T> extends AbstractModel{
 		 
 		 return inicializaCampos(filtrarPesquisa(filtroDTO, entidade), camposInitialize);
 	 }
-	 
+
+	@SuppressWarnings("unchecked")
+	public <P extends Serializable> List<P> listUnicaColuna(String coluna, Class<T> clazz) {
+
+		Criteria cr = getSession().createCriteria(clazz);
+
+		ProjectionList projectionList = Projections.projectionList();
+
+		projectionList.add(Projections.property(coluna));
+
+		cr.setProjection(projectionList);
+
+		return cr.list();
+	}
+
     public T primeiroRegistroPorFiltro(Object filtroDTO, Class<T> entidade, String...camposInitialize) {
     	
     	List<T> list = null;
@@ -134,19 +151,24 @@ public class ConsultasDaoJpa<T> extends AbstractModel{
 				String join = field.getAnnotation(EntityProperty.class).value();
 				boolean isPesquisaExata = field.getAnnotation(EntityProperty.class).pesquisaExata();
 				boolean ignoraCaseSensitive = field.getAnnotation(EntityProperty.class).ignoraCaseSensitive();
+				boolean listIds = field.getAnnotation(EntityProperty.class).listIds();
 
 				montaJoinsParaOrdenacao(criteria, todosAlias, join);
 
-				montaWhere(criteria, valor, join, isPesquisaExata, ignoraCaseSensitive);
+				montaWhere(criteria, valor, join, isPesquisaExata, ignoraCaseSensitive, listIds);
 			}
 		}
 
 		return (List<T>) criteria.list();
     }
 
-	private void montaWhere(Criteria criteria, Object valor, String join, boolean isPesquisaExata, boolean ignoraCaseSensitive) {
+	private void montaWhere(Criteria criteria, Object valor, String join, boolean isPesquisaExata, boolean ignoraCaseSensitive, boolean listIds) {
 		
-		if (isPesquisaExata && ignoraCaseSensitive && valor instanceof String){
+		if (listIds){
+			
+			criteria.add(Restrictions.in(join, (List<?>) valor));
+			
+		}else if (isPesquisaExata && ignoraCaseSensitive && valor instanceof String){
 			
 			criteria.add(Restrictions.ilike(join, valor.toString().toLowerCase() , MatchMode.EXACT));
 			

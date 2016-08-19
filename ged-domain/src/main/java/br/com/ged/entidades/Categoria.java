@@ -11,15 +11,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import br.com.ged.domain.Situacao;
 import br.com.ged.generics.EntidadeBasica;
  
 @Entity
-@Table(name = "tb_categoria_doc")
+@Table(name = "tb_categoria")
 public class Categoria extends EntidadeBasica implements Serializable, Comparable<Categoria>{
  
 	/**
@@ -28,8 +30,9 @@ public class Categoria extends EntidadeBasica implements Serializable, Comparabl
 	private static final long serialVersionUID = 7181106172249020200L;
 
 	@Id
-	@Column(name = "id_documento")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id_categoria")
+	@GeneratedValue(generator = "seq_categoria", strategy = GenerationType.AUTO)
+	@SequenceGenerator(name = "seq_categoria", sequenceName = "seq_categoria",allocationSize=1)
 	private Long id;
 	
 	@Column(name="descricao")
@@ -42,7 +45,15 @@ public class Categoria extends EntidadeBasica implements Serializable, Comparabl
 	@JoinColumn(name="id_categoria_pai")
 	private Categoria categoriaPai;
 	
-	@OneToMany(mappedBy="categoriaPai", cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+	@OneToMany
+	@JoinTable(
+		name = "rl_categoria_grupousuario", 
+		joinColumns = @JoinColumn(name = "id_categoria"), 
+		inverseJoinColumns = @JoinColumn(name = "id_grupo_usuario")
+	)
+    private List<GrupoUsuario> listGrupoUsuario;
+	
+	@OneToMany(mappedBy="categoriaPai", cascade=CascadeType.ALL, fetch=FetchType.EAGER, orphanRemoval=true)
 	private List<Categoria> categoriaFilha;
 	
 	public Categoria(){
@@ -89,6 +100,14 @@ public class Categoria extends EntidadeBasica implements Serializable, Comparabl
 		this.categoriaFilha = categoriaFilha;
 	}
 
+	public List<GrupoUsuario> getListGrupoUsuario() {
+		return listGrupoUsuario;
+	}
+
+	public void setListGrupoUsuario(List<GrupoUsuario> listGrupoUsuario) {
+		this.listGrupoUsuario = listGrupoUsuario;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -97,6 +116,7 @@ public class Categoria extends EntidadeBasica implements Serializable, Comparabl
 		result = prime * result + ((categoriaPai == null) ? 0 : categoriaPai.hashCode());
 		result = prime * result + ((descricao == null) ? 0 : descricao.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((listGrupoUsuario == null) ? 0 : listGrupoUsuario.hashCode());
 		result = prime * result + ((situacao == null) ? 0 : situacao.hashCode());
 		return result;
 	}
@@ -130,6 +150,11 @@ public class Categoria extends EntidadeBasica implements Serializable, Comparabl
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
+		if (listGrupoUsuario == null) {
+			if (other.listGrupoUsuario != null)
+				return false;
+		} else if (!listGrupoUsuario.equals(other.listGrupoUsuario))
+			return false;
 		if (situacao != other.situacao)
 			return false;
 		return true;
@@ -142,6 +167,6 @@ public class Categoria extends EntidadeBasica implements Serializable, Comparabl
 
 	@Override
 	public int compareTo(Categoria o) {
-		 return this.getId().compareTo(o.getId());
+		 return this.getDescricao().toLowerCase().compareTo(o.getDescricao().toLowerCase());
 	}
 }

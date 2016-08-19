@@ -21,4 +21,6 @@ public interface UsuarioService {
 	List<Usuario> pesquisar(FiltroUsuarioDTO filtro);
 
 	Usuario usuarioPorUsername(String objUsuarioSessao);
+
+	void excluir(Long id);
 }

@@ -16,7 +16,6 @@ import br.com.ged.domain.Pagina;
 import br.com.ged.domain.TipoFuncionalidadeEnum;
 import br.com.ged.dto.FiltroGrupoUsuarioDTO;
 import br.com.ged.entidades.GrupoUsuario;
-import br.com.ged.entidades.Usuario;
 import br.com.ged.excecao.NegocioException;
 
 @ManagedBean(name="cadastroGrupoUsuario")
@@ -32,6 +31,11 @@ public class GrupoUsuarioCadastroController extends GrupoUsuarioSuperController{
 	@PostConstruct
 	public void inicio() {
 		
+		inicializaCampos();
+		super.atualizaListaUsuariosSemGrupo();
+	}
+
+	private void inicializaCampos() {
 		grupoUsuario = new GrupoUsuario();
 		tipoFuncionalidadesSelecionadas = new ArrayList<String>();
 		
@@ -47,32 +51,14 @@ public class GrupoUsuarioCadastroController extends GrupoUsuarioSuperController{
 		
 		try {
 			
-			getGrupoUsuario().setUsuarios(recuperaUsuariosSelecionados());
+			getGrupoUsuario().setUsuarios(super.getListUsuarioSelecionados());
 			validacaoGrupoUsuario.valida(getGrupoUsuario());
-			super.cadastrar();
-			this.inicio();
+			service.merge(getGrupoUsuario());
+			this.inicializaCampos();
 			this.renderizaDataTableFuncionalidade();
 		} catch (NegocioException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	private List<Usuario> recuperaUsuariosSelecionados() {
-		
-		if (getUsuariosSelecionados() == null || getUsuariosSelecionados().isEmpty()){
-			return null;
-		}
-		
-		List<Usuario> listUsuariosSelecionados = new ArrayList<>();
-		
-		for (Long idUsuario : getUsuariosSelecionados()){
-			
-			Usuario usuario = serviceGenericUsuario.getById(Usuario.class, idUsuario);
-					
-			listUsuariosSelecionados.add(usuario);
-		}
-		
-		return listUsuariosSelecionados;
 	}
 
 	public void adicionarFuncionalidade(){
@@ -99,7 +85,7 @@ public class GrupoUsuarioCadastroController extends GrupoUsuarioSuperController{
 		
 		Set<TipoFuncionalidadeEnum> listTp = new HashSet<>();
 		
-		for (TipoFuncionalidadeEnum tp : func.getFuncionalidades()){
+		for (TipoFuncionalidadeEnum tp : func.getPermissoes()){
 			
 			for (String labelTpSelecionado : tipoFuncionalidadesSelecionadas){
 				
@@ -115,7 +101,7 @@ public class GrupoUsuarioCadastroController extends GrupoUsuarioSuperController{
 	
 	public void excluir(){
 		
-		excluirFuncionalidade();
+		excluirFuncionalidade(getGrupoUsuario());
 		
 		renderizaDataTableFuncionalidade();
 	}
@@ -136,7 +122,7 @@ public class GrupoUsuarioCadastroController extends GrupoUsuarioSuperController{
 			return;
 		}
 		
-		tipoFuncionalidades = FuncionalidadeEnum.listTiposPorName(funcionalidadeSelecionada);
+		tipoFuncionalidades = FuncionalidadeEnum.listTipos(funcionalidadeSelecionada, getUsuarioLogado().getRole());
 		tipoFuncionalidadesSelecionadas.addAll(tipoFuncionalidades);
 	}
 	

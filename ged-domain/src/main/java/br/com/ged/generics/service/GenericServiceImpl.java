@@ -32,6 +32,11 @@ public class GenericServiceImpl<T extends EntidadeBasica, ID extends Serializabl
 	public List<T> listarTodos(Class<T> clazz) {
 		return reposiroty.listarTodos(clazz);
 	}
+	
+	@Override
+	public List<T> listarTodos(Class<T> clazz, String... camposInitialize) {
+		return reposiroty.listarTodos(clazz, camposInitialize);
+	}
 
 	@Override
 	public T getById(Class<T> clazz, ID id, String... camposInitialize) {
@@ -46,5 +51,15 @@ public class GenericServiceImpl<T extends EntidadeBasica, ID extends Serializabl
 	@Override
 	public T merge(T t) {
 		return reposiroty.merge(t);
+	}
+
+	@Override
+	public boolean emptyTable(Class<T> t) {
+		return reposiroty.emptyTable(t);
+	}
+
+	@Override
+	public boolean singleLine(Class<T> class1) {
+		return reposiroty.singleLine(class1);
 	}
 }

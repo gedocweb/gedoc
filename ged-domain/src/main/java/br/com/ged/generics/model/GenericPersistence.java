@@ -20,4 +20,8 @@ public interface GenericPersistence<T extends EntidadeBasica, ID extends Seriali
 	void excluir(T id);
 	
 	T merge(T t);
+
+	boolean emptyTable(Class<T> t);
+
+	boolean singleLine(Class<T> class1);
 }
