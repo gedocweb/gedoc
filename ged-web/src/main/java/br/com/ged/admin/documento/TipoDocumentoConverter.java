@@ -1,8 +1,5 @@
 package br.com.ged.admin.documento;
  
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.component.UIComponent;
