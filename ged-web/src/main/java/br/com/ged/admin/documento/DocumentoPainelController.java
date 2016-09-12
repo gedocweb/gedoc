@@ -648,7 +648,7 @@ public class DocumentoPainelController extends DocumentoSuperController{
 	    	
 	    	String[] divideNomeArquivoPelaExtensao = StringUtils.split(fileName, ".");
 	    	String nomeSemExtensao = divideNomeArquivoPelaExtensao[0];
-	    	String extensao = divideNomeArquivoPelaExtensao[1];
+	    	String extensao = divideNomeArquivoPelaExtensao[divideNomeArquivoPelaExtensao.length - 1];
 	    	
 	    	String filePDF = nomeSemExtensao+".pdf";
 	    	
