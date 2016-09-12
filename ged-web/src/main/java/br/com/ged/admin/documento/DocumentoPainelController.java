@@ -574,8 +574,7 @@ public class DocumentoPainelController extends DocumentoSuperController{
 	}
 	
 	public StreamedContent exportar(){
-		try {
-			System.out.println(getCategoriaSelecionada().getDescricao());
+		try {			
 			documento.setCategoria(getCategoriaSelecionada());						
 			
 			documentoValidatorView.validaExportar(documento);
@@ -726,7 +725,7 @@ public class DocumentoPainelController extends DocumentoSuperController{
 	    	
 	    	String[] divideNomeArquivoPelaExtensao = StringUtils.split(fileName, ".");
 	    	String nomeSemExtensao = divideNomeArquivoPelaExtensao[0];
-	    	String extensao = divideNomeArquivoPelaExtensao[1];
+	    	String extensao = divideNomeArquivoPelaExtensao[divideNomeArquivoPelaExtensao.length - 1];
 	    	
 	    	String filePDF = nomeSemExtensao+".pdf";
 	    	
