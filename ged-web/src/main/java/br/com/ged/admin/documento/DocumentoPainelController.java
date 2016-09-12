@@ -49,6 +49,7 @@ import br.com.ged.entidades.TipoDocumento;
 import br.com.ged.entidades.Usuario;
 import br.com.ged.excecao.NegocioException;
 import br.com.ged.framework.GenericServiceController;
+import br.com.ged.service.CategoriaDocumentoService;
 import br.com.ged.service.DocumentoService;
 import br.com.ged.service.GrupoUsuarioService;
 
@@ -88,6 +89,9 @@ public class DocumentoPainelController extends DocumentoSuperController{
     
     @EJB
     private CategoriaDocumentoValidadorView categoriaValidador;
+    
+    @EJB
+	private CategoriaDocumentoService categoriaService;
     
     //Tipo documento
     private List<TipoDocumento> listTipoDocumento;
@@ -430,10 +434,18 @@ public class DocumentoPainelController extends DocumentoSuperController{
 	
 	public void excluirCategoria(){
 			
-		serviceCategoria.excluir(categoriaSelecionada);
-		iniciaCategoria();
-		categoria = new Categoria();
-		limpaCategoriaSelecionada();
+		try{
+			
+			categoriaService.excluir(categoriaSelecionada);
+			iniciaCategoria();
+			categoria = new Categoria();
+			limpaCategoriaSelecionada();
+			enviaMensagem(Mensagem.MDF001);
+			
+		}catch(NegocioException e){
+			
+			e.printStackTrace();
+		}
 	}
 	
 	public void novaCategoria(){

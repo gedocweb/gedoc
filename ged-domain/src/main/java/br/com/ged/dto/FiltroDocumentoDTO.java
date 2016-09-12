@@ -35,6 +35,9 @@ public class FiltroDocumentoDTO implements Serializable{
 	@EntityProperty(value="categoria.id", listIds=true)
 	private List<Long> subCategorias;
 	
+	@EntityProperty(value="categoria.id")
+	private Long idCategoria;
+	
 	public FiltroDocumentoDTO(){
 		dataInclusaoDocumento = new DataFiltroBetween();
 		dataDocumento = new DataFiltroBetween();
@@ -95,5 +98,13 @@ public class FiltroDocumentoDTO implements Serializable{
 
 	public void setSubCategorias(List<Long> subCategorias) {
 		this.subCategorias = subCategorias;
+	}
+
+	public Long getIdCategoria() {
+		return idCategoria;
+	}
+
+	public void setIdCategoria(Long idCategoria) {
+		this.idCategoria = idCategoria;
 	}
 }

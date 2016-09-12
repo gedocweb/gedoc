@@ -3,20 +3,20 @@ package br.com.ged.controller.login;
 import static br.com.ged.util.InitMessageProperties.getValue;
 
 import javax.ejb.EJBException;
+import javax.faces.application.FacesMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import br.com.ged.domain.Mensagem;
+import br.com.ged.framework.AbstractInterceptionMessage;
 import br.com.ged.login.service.AutorizacaoService;
 import br.com.ged.util.container.AtributoSessao;
 import br.com.ged.util.criptografia.CriptografiaUtil;
@@ -30,7 +30,7 @@ import br.com.ged.util.criptografia.CriptografiaUtil;
  * <p>Controlada pelo spring a partir do arquivo de configuração applicationContext.xml </>
  * 
  */
-public class AuthenticationProviderCustom implements AuthenticationProvider {
+public class AuthenticationProviderCustom extends AbstractInterceptionMessage implements AuthenticationProvider {
 	
 	/**
 	 * Injeta interface EJB a partir do contexto do spring, configuração feita no applicationContext.xml (Pela tag: jee:local-slsb)
@@ -73,14 +73,16 @@ public class AuthenticationProviderCustom implements AuthenticationProvider {
 		try{
 			userDetails = usuarioService.loadUserByUsername(authentication.getName());
 		}catch(EJBException e){
-			throw new UsernameNotFoundException(getValue(Mensagem.MNG003), e);
+			
+			super.enviaMensagem(getValue(Mensagem.MLOGIN1), FacesMessage.SEVERITY_WARN);
+			e.printStackTrace();
 		}
 		
 		String senhaCriptografada = CriptografiaUtil.criptografar(authentication.getCredentials());
 		
 		if (!userDetails.getPassword().equals(senhaCriptografada)){
-			
-			throw new BadCredentialsException(getValue(Mensagem.MNG002));
+			super.enviaMensagem(getValue(Mensagem.MLOGIN2), FacesMessage.SEVERITY_WARN);
+			return Boolean.FALSE;
 		}
 		
 		return adicionaPermissoesUsuarioNaSessao(userDetails);

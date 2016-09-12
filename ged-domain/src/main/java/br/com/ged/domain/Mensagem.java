@@ -16,6 +16,10 @@ public enum Mensagem {
 	MNG004(TipoMensagem.ALERTA),
 	MNG005(TipoMensagem.ALERTA),
 	
+	//Login
+	MLOGIN1(TipoMensagem.ALERTA),
+	MLOGIN2(TipoMensagem.ALERTA),
+	
 	//Grupo de Usuario
 	GRUPOUSUARIO11(TipoMensagem.ALERTA),
 	GRUPOUSUARIO12(TipoMensagem.ALERTA),
@@ -102,7 +106,10 @@ public enum Mensagem {
 	MSA002(TipoMensagem.ESTATICO),
 	MSA003(TipoMensagem.ESTATICO),
 	MSA004(TipoMensagem.ESTATICO),
-	MSA005(TipoMensagem.ESTATICO);
+	MSA005(TipoMensagem.ESTATICO), 
+	
+	ERRO_DEFAULT(TipoMensagem.ALERTA), 
+	;
 	
 	private TipoMensagem tipo;
 	
