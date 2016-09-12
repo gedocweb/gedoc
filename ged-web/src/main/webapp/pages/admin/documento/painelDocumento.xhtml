@@ -92,11 +92,12 @@
 			    	<p:outputPanel autoUpdate="true"> 
 		       		
 	       				<p:commandButton value="Novo Documento" action="#{painelDocumento.preparaCadastro}" icon="ui-icon-plus" rendered="#{(!painelDocumento.renderizaCadastro or painelDocumento.renderizaAlterar) and painelDocumento.autorizaFuncionalidade('CADASTRAR_DOCUMENTO')}" />
-	       				<p:commandButton value="Pesquisa" action="#{painelDocumento.preparaPesquisa}" icon="ui-icon-search" rendered="#{painelDocumento.renderizaCadastro or painelDocumento.renderizaAlterar}" />
+	       				<p:commandButton value="Exportar" action="#{painelDocumento.preparaExportar}" icon="ui-icon-plus" rendered="#{(!painelDocumento.renderizaExportar or painelDocumento.renderizaAlterar) and painelDocumento.autorizaFuncionalidade('EXPORTAR_DOCUMENTO')}" />
+	       				<p:commandButton value="Pesquisa" action="#{painelDocumento.preparaPesquisa}" icon="ui-icon-search" rendered="#{painelDocumento.renderizaCadastro or painelDocumento.renderizaAlterar or painelDocumento.renderizaExportar}" />
 		       		
 		       			<p:separator></p:separator>
 		       		
-		       			<p:fieldset legend="#{painelDocumento.tituloFildSetDocumento}" toggleable="true" toggleSpeed="500" rendered="#{!painelDocumento.renderizaAlterar}">
+		       			<p:fieldset legend="#{painelDocumento.tituloFildSetDocumento}" toggleable="true" toggleSpeed="500" rendered="#{!painelDocumento.renderizaAlterar and !painelDocumento.renderizaExportar}">
 		       				
 		       				<h:panelGrid columns="2" cellpadding="10" rendered="#{!painelDocumento.renderizaCadastro and !painelDocumento.renderizaAlterar}">
 		       					
@@ -277,8 +278,38 @@
 			       			</h:panelGrid>
 		       			
 	       				</p:fieldset>
+	       				
+	       				<p:fieldset legend="#{painelDocumento.tituloFildSetDocumento}" toggleable="true" toggleSpeed="500" rendered="#{painelDocumento.renderizaExportar}">
+		       			
+			       			<h:panelGrid columns="4" cellpadding="10">
+			       				<p:outputLabel value="Período da inclusão do documento de:" for="calendaDeInclusaoExportar"></p:outputLabel>
+				       			<p:calendar id="calendaDeInclusaoExportar" value="#{painelDocumento.filtroDocumentoDTO.dataInclusaoDocumento.dataInicio}"></p:calendar>
+				       			<p:outputLabel value="até:" for="calendarAteInclusaoExportar" rendered="#{!painelDocumento.renderizaCadastro}"></p:outputLabel>
+				       			<p:calendar id="calendarAteInclusaoExportar" value="#{painelDocumento.filtroDocumentoDTO.dataInclusaoDocumento.dataFim}"></p:calendar>			       				
+				       		</h:panelGrid>
+				       		
+				       		<h:panelGrid columns="2" cellpadding="10">
+		       					
+		       					<p:selectBooleanCheckbox itemLabel="Incluir sub categorias" label="Incluir sub categorias" value="#{painelDocumento.pesquisarSubCategorias}">
+		       					</p:selectBooleanCheckbox>		       							       				
+		       				
+		       				</h:panelGrid>
+		       				
+			       			       								       		
+			       			<p:separator></p:separator>
+			       			
+			       			<h:panelGrid style="margin:0 auto; text-align:center;" >			       						       							       			
+			       				 <p:commandButton ajax="false" title="Exportar"
+			       				 	onclick="PrimeFaces.monitorDownload(start, stop);" icon="ui-icon-arrowthickstop-1-s"
+			       				 	value="Exportar"
+			       				 	rendered="#{painelDocumento.autorizaFuncionalidade('EXPORTAR_DOCUMENTO')}">								                	
+										<p:fileDownload value="#{painelDocumento.exportar()}"  />
+								</p:commandButton>
+			       			</h:panelGrid>
+		       			
+	       				</p:fieldset>
 		       		
-			       		<p:panel id="listaDocumento" header="Documentos Digitalizados" rendered="#{!painelDocumento.renderizaCadastro and !painelDocumento.renderizaAlterar}">
+			       		<p:panel id="listaDocumento" header="Documentos Digitalizados" rendered="#{!painelDocumento.renderizaCadastro and !painelDocumento.renderizaAlterar and !painelDocumento.renderizaExportar}">
 			       			
 			       				<p:dataGrid var="doc" value="#{painelDocumento.listDocumento}" columns="3" layout="grid"
 							        rows="12" paginator="true" id="docs" emptyMessage="Nenhum documento digitalizado.">

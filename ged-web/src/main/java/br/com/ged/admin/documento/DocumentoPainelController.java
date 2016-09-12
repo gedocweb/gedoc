@@ -2,11 +2,14 @@ package br.com.ged.admin.documento;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -22,7 +25,9 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.NodeSelectEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.StreamedContent;
 import org.primefaces.model.TreeNode;
 import org.primefaces.model.UploadedFile;
 
@@ -100,6 +105,8 @@ public class DocumentoPainelController extends DocumentoSuperController{
     private Documento documento;
     
     private boolean renderizaCadastro = false;
+    //Flag para controlar a exibição do painel de exportação de documentos
+    private boolean renderizaExportar = false;
     private String tituloFildSetDocumento;
     private boolean arquivoAnexado;
     private boolean renderizaAlterar = false;
@@ -172,10 +179,12 @@ public class DocumentoPainelController extends DocumentoSuperController{
 	
 	private void renderizaTituloFieldSet() {
 		
-		if (!renderizaCadastro){
-			tituloFildSetDocumento = "Filtro para pesquisa";
-		}else{
+		if(renderizaCadastro){
 			tituloFildSetDocumento = "Informações para cadastro";
+		}else if(renderizaExportar){
+			tituloFildSetDocumento = "Exportar Documentos";
+		}else{
+			tituloFildSetDocumento = "Filtro para Pesquisa";
 		}
 	}
 
@@ -184,6 +193,7 @@ public class DocumentoPainelController extends DocumentoSuperController{
 		arquivoAnexado = false;
 		renderizaCadastro = true;
 		renderizaAlterar = Boolean.FALSE;
+		renderizaExportar = Boolean.FALSE;
 		renderizaTituloFieldSet();
 		documento = inicializaDocumento();
 		documentoSelecionado = inicializaDocumento();
@@ -196,6 +206,22 @@ public class DocumentoPainelController extends DocumentoSuperController{
 		arquivoAnexado = false;
 		renderizaCadastro = false;
 		renderizaAlterar = Boolean.FALSE;
+		renderizaExportar = Boolean.FALSE;
+		renderizaTituloFieldSet();
+		documento = inicializaDocumento();
+		documentoSelecionado = inicializaDocumento();
+		listDocumento = new ArrayList<>();
+		
+		converterArquivoParaPDF = Boolean.FALSE;
+		extensaoArquivoDiferentePDF = Boolean.FALSE;
+	}
+	
+	public void preparaExportar(){
+		
+		arquivoAnexado = false;
+		renderizaCadastro = false;
+		renderizaAlterar = Boolean.FALSE;
+		renderizaExportar = Boolean.TRUE;
 		renderizaTituloFieldSet();
 		documento = inicializaDocumento();
 		documentoSelecionado = inicializaDocumento();
@@ -211,6 +237,7 @@ public class DocumentoPainelController extends DocumentoSuperController{
 		arquivoAnexado = doc.getArquivo().getId() != null;
 		renderizaAlterar = Boolean.TRUE;
 		renderizaCadastro = Boolean.FALSE;
+		renderizaExportar = Boolean.FALSE;
 		
 		if (doc.getArquivo().getDescricao().endsWith(".pdf")){
 			
@@ -537,6 +564,57 @@ public class DocumentoPainelController extends DocumentoSuperController{
 			iniciaTipoDocumento();
 			tipoDocumentoSelecionado = new TipoDocumento();
 		}
+	}
+	
+	public String createPathFromCategory(Categoria pai, Categoria atual, String path){
+		if(pai.getId() == atual.getId()){
+			return pai.getDescricao();
+		}
+		return createPathFromCategory(pai, atual.getCategoriaPai(), path) + File.separator + atual.getDescricao();  
+	}
+	
+	public StreamedContent exportar(){
+		try {
+			System.out.println(getCategoriaSelecionada().getDescricao());
+			documento.setCategoria(getCategoriaSelecionada());						
+			
+			documentoValidatorView.validaExportar(documento);
+			
+			filtroDocumentoDTO.setSubCategorias(new ArrayList<Long>());
+			filtroDocumentoDTO.getSubCategorias().add(getCategoriaSelecionada().getId());
+			
+			if (pesquisarSubCategorias){
+				filtroDocumentoDTO.getSubCategorias().addAll(extraiIdsSubCategoriasSelecionadas(getCategoriaSelecionada().getCategoriaFilha()));
+			}
+						
+			filtroDocumentoDTO.setIdTipoDocumento(null);			
+			
+			List<Documento> documentosFiltrados = documentoService.pesquisar(filtroDocumentoDTO,"arquivo");
+			
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ZipOutputStream zos = new ZipOutputStream(baos);
+									
+			for (Documento doc : documentosFiltrados){
+				String docDescricao = doc.getArquivo().getDescricao();
+				/*String zipArquivoDescricao = doc.getCategoria().getId() ==  getCategoriaSelecionada().getId() ? docDescricao :
+					createPathFromCategory(categoriaSelecionada, doc.getCategoria(), "") + File.separator + docDescricao;*/						
+				String zipArquivoDescricao = createPathFromCategory(categoriaSelecionada, doc.getCategoria(), "") + File.separator + docDescricao;
+				ZipEntry entry = new ZipEntry(zipArquivoDescricao);
+				entry.setSize(doc.getArquivo().getArquivo().length);
+				zos.putNextEntry(entry);
+				zos.write(doc.getArquivo().getArquivo());
+				zos.closeEntry();									
+			}												
+			zos.close();
+			ByteArrayInputStream btArray = new ByteArrayInputStream(baos.toByteArray());        	
+            return new DefaultStreamedContent(btArray, "application/zip", getCategoriaSelecionada().getDescricao() + ".zip");          
+            
+		} catch (NegocioException e) {
+			e.printStackTrace();		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public void pesquisar(){
@@ -998,4 +1076,12 @@ public class DocumentoPainelController extends DocumentoSuperController{
 	public void setListGrupoUsuarioCategoriaSelecionados(List<String> listGrupoUsuarioCategoriaSelecionados) {
 		this.listGrupoUsuarioCategoriaSelecionados = listGrupoUsuarioCategoriaSelecionados;
 	}
+
+	public boolean isRenderizaExportar() {
+		return renderizaExportar;
+	}
+
+	public void setRenderizaExportar(boolean renderizaExportar) {
+		this.renderizaExportar = renderizaExportar;
+	}	
 }

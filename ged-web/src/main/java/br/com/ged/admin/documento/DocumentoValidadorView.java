@@ -44,4 +44,10 @@ public class DocumentoValidadorView extends AbstractValidacao{
 			throw new NegocioException(Mensagem.DOCCADASTRO5);
 		}
 	}
+	
+	public void validaExportar(Documento documento) throws NegocioException {
+		if (documento.getCategoria() == null || documento.getCategoria().getId() == null){
+			throw new NegocioException(Mensagem.DOCPESQUISA1);
+		}
+	}	
 }

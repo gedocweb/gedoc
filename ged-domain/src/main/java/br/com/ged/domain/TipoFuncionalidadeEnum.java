@@ -53,8 +53,8 @@ public enum TipoFuncionalidadeEnum {
 	ALTERAR_DOCUMENTO("Alterar Documento", FuncionalidadeEnum.MANTER_DOCUMENTO, Role.ADMIN, Role.GERENTE),
 	VISUALIZAR_DOCUMENTO("Visualizar Documento PDF", FuncionalidadeEnum.MANTER_DOCUMENTO, Role.ADMIN, Role.GERENTE),
 	BAIXAR_DOCUMENTO("Baixar Documento", FuncionalidadeEnum.MANTER_DOCUMENTO, Role.ADMIN, Role.GERENTE),
-	REMOVER_DOCUMENTO("Remover Documento", FuncionalidadeEnum.MANTER_DOCUMENTO, Role.ADMIN, Role.GERENTE)
-	;
+	REMOVER_DOCUMENTO("Remover Documento", FuncionalidadeEnum.MANTER_DOCUMENTO, Role.ADMIN, Role.GERENTE),
+	EXPORTAR_DOCUMENTO("Exportar Documentos", FuncionalidadeEnum.MANTER_DOCUMENTO, Role.ADMIN, Role.GERENTE);
 	
 	private String label;
 	private FuncionalidadeEnum funcionalidade;

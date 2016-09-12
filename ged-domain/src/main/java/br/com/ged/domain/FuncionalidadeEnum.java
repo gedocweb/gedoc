@@ -59,7 +59,8 @@ public enum FuncionalidadeEnum {
 			TipoFuncionalidadeEnum.ALTERAR_DOCUMENTO,
 			TipoFuncionalidadeEnum.VISUALIZAR_DOCUMENTO,
 			TipoFuncionalidadeEnum.BAIXAR_DOCUMENTO,
-			TipoFuncionalidadeEnum.REMOVER_DOCUMENTO);
+			TipoFuncionalidadeEnum.REMOVER_DOCUMENTO,
+			TipoFuncionalidadeEnum.EXPORTAR_DOCUMENTO);
 	
 	private String label;
 
