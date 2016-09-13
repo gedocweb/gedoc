@@ -71,21 +71,14 @@
 		<h:form id="form">
 		 
 			<p:growl id="messages" autoUpdate="true" closable="true" style="margin:0 auto; width:80%; text-align:center;" />
+
+		<div id="logout" style="margin: 0 auto; width: 80%;">
+
+			<ui:include src="/pages/template/infoUsuarioLogado.xhtml" />
 			
-			 <div id="logout" style="margin:0 auto; width:80%;" >
-			 
-				<p:separator></p:separator>
-			 	<p:commandButton action="#{painelAdmin.logout()}" value="Sair" icon="ui-icon-power"  style="text-align:rigth !important;"></p:commandButton>
-			 	<p:separator></p:separator>
-			 	<p:outputLabel value="Bem-Vindo: #{painelAdmin.usuarioLogado.pessoa.nome}" style="color:black"></p:outputLabel>
-			 	<br/>
-			 	<p:outputLabel value="Role de acesso: #{painelAdmin.usuarioLogado.role.label}" style="color:black"></p:outputLabel>
-			 	<br/>
-			 	<p:outputLabel value="Grupo de usuários: #{painelAdmin.grupoUsuarioLogado.grupo}" style="color:black"></p:outputLabel>
-			 	<p:separator></p:separator>
-			 </div>
-		
-		    <p:panel id="painel" header="#{msg['MENU01']}" style="margin:0 auto; width:80%; text-align:center;" >
+		</div>
+
+		<p:panel id="painel" header="#{msg['MENU01']}" style="margin:0 auto; width:80%; text-align:center;" >
 		    
 			   <ui:include src="/pages/template/menu.xhtml" />
 		        
