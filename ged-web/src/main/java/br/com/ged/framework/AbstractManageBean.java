@@ -3,6 +3,7 @@ package br.com.ged.framework;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import javax.annotation.PostConstruct;
@@ -95,6 +96,8 @@ public abstract class AbstractManageBean extends AutorizacaoManageBean {
 	@PostConstruct
 	@Override
 	public void validaPermissionamento() throws IOException, NegocioException {
+		
+		context().getApplication().setDefaultLocale(new Locale("pt", "BR"));
 		
 		try{
 			authentication = SecurityContextHolder.getContext().getAuthentication();
